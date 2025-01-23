@@ -6,10 +6,28 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct MapView: View {
+    
+    @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 37.331516,
+                                                                                  longitude: -121.891054),
+                                                   span: MKCoordinateSpan(latitudeDelta: 0.005,
+                                                                          longitudeDelta: 0.005))
+    
     var body: some View {
-        Text("MapView")
+        ZStack {
+            Map(coordinateRegion: $region)
+                .ignoresSafeArea()
+            VStack {
+                Image("Green-Circle-PNG-Image")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 70)
+                    .shadow(radius: 10)
+                Spacer()
+            }
+        }
     }
 }
 

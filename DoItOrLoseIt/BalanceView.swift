@@ -9,7 +9,13 @@ import SwiftUI
 
 struct BalanceView: View {
     var body: some View {
-        Text("BalanceView")
+        NavigationView(){
+            VStack{
+                
+            }
+            .navigationTitle("Your Balance")
+        }
+        
     }
 }
 

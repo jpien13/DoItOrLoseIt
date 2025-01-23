@@ -9,7 +9,12 @@ import SwiftUI
 
 struct TaskView: View {
     var body: some View {
-        Text("TaskView")
+        NavigationView(){
+            ScrollView {
+                
+            }
+            .navigationTitle("Your Tasks")
+        }
     }
 }
 
