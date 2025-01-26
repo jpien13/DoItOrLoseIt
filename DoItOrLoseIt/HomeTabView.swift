@@ -16,7 +16,7 @@ struct HomeTabView: View {
                     Image(systemName: "dollarsign.circle")
                     Text("Balance")
                 }
-            TaskView()
+            TaskListView()
                 .tabItem {
                     Image(systemName: "checklist")
                     Text("Tasks")

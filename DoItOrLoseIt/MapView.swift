@@ -19,14 +19,7 @@ struct MapView: View {
         ZStack {
             Map(coordinateRegion: $region)
                 .ignoresSafeArea()
-            VStack {
-                Image("Green-Circle-PNG-Image")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 70)
-                    .shadow(radius: 10)
-                Spacer()
-            }
+
         }
     }
 }
