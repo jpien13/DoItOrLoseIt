@@ -26,6 +26,9 @@ struct HomeTabView: View {
                     Image(systemName: "map")
                     Text("Map")
                 }
+                .ignoresSafeArea(edges: .top)
+                .padding(.bottom)
+            
         }
     }
 }
