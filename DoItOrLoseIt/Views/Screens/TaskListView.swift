@@ -7,7 +7,14 @@
 
 import SwiftUI
 
+// =============================================================
+// A VIEW that renders the UI displaying data from the VIEWMODEL
+// (V in MVVM Model-View-ViewModel)
+// =============================================================
+
 struct TaskListView: View {
+    
+    @EnvironmentObject var viewModel: PinTaskViewModel
     
     var body: some View {
         
@@ -17,7 +24,7 @@ struct TaskListView: View {
                     Spacer()
                         .frame(height: 20)
                     
-                    ForEach(MockData.pinTasks, id: \.id) { pinTaskItem in
+                    ForEach(viewModel.pinTasks, id: \.id) { pinTaskItem in
                         NavigationLink(value: pinTaskItem) {
                             TaskItemView(pinTask: pinTaskItem)
                         }
@@ -34,4 +41,5 @@ struct TaskListView: View {
 
 #Preview {
     TaskListView()
+        .environmentObject(PinTaskViewModel())
 }

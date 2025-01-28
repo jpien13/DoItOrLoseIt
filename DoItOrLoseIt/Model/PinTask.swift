@@ -7,6 +7,11 @@
 
 import Foundation
 
+// ============================================
+// The MODEL that defines the structure of data
+// (M in MVVM Model-View-ViewModel)
+// ============================================
+
 struct PinTask: Hashable, Identifiable {
     
     let id = UUID()

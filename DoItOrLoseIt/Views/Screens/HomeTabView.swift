@@ -9,6 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct HomeTabView: View {
+
+    @StateObject private var viewModel = PinTaskViewModel()
+    
     var body: some View {
         TabView {
             BalanceView()
@@ -17,11 +20,13 @@ struct HomeTabView: View {
                     Text("Balance")
                 }
             TaskListView()
+                .environmentObject(viewModel) // inject ViewModel into this view so this view has 1 shared source of truth
                 .tabItem {
                     Image(systemName: "checklist")
                     Text("Tasks")
                 }
             MapView()
+                .environmentObject(viewModel) // inject ViewModel into this view so this view has 1 shared source of truth
                 .tabItem {
                     Image(systemName: "map")
                     Text("Map")
@@ -35,4 +40,5 @@ struct HomeTabView: View {
 
 #Preview {
     HomeTabView()
+        .environmentObject(PinTaskViewModel())
 }

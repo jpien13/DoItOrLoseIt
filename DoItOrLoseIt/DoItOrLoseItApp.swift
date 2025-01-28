@@ -10,7 +10,7 @@ import SwiftData
 
 @main
 struct DoItOrLoseItApp: App {
-
+    
     var body: some Scene {
         WindowGroup {
             HomeTabView()
