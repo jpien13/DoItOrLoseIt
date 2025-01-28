@@ -35,5 +35,4 @@ struct HomeTabView: View {
 
 #Preview {
     HomeTabView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
