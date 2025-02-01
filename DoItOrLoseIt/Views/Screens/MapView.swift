@@ -26,11 +26,20 @@ struct MapView: View {
         ZStack {
             Map(coordinateRegion: $region,
                 showsUserLocation: true,
+                userTrackingMode: .constant(.follow),
                 annotationItems: viewModel.pinTasks) { pinTask in
                 MapMarker(coordinate: CLLocationCoordinate2D(latitude: pinTask.latitude,
                                                                  longitude: pinTask.longitude))
                 
             }
+        }
+        .onAppear {
+            viewModel.checkIfLocationServicesIsEnabled()
+        }
+        .alert(item: $viewModel.alertItem) { alertItem in
+            Alert(title: alertItem.title,
+                      message: alertItem.message,
+                      dismissButton: alertItem.dismissButton)
         }
     }
 }

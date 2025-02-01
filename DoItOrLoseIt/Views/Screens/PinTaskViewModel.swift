@@ -16,7 +16,7 @@ import MapKit
 // (VM in MVVM Model-View-ViewModel)
 // =============================================================
 
-class PinTaskViewModel: ObservableObject {
+class PinTaskViewModel: NSObject, ObservableObject {
     
     @Published var alertItem: AlertItem?
     @Published var pinTasks: [PinTask] = MockData.pinTasks // @Published to notify Views of data changes
@@ -26,13 +26,14 @@ class PinTaskViewModel: ObservableObject {
     func checkIfLocationServicesIsEnabled() {
         if CLLocationManager.locationServicesEnabled() {
             deviceLocationManager = CLLocationManager()
+            deviceLocationManager!.delegate = self
             deviceLocationManager?.desiredAccuracy = kCLLocationAccuracyBest
         } else {
             alertItem = AlertContext.locationDisabled
         }
     }
     
-    func checkLocationAuth() {
+    private func checkLocationAuth() {
         guard let deviceLocationManager = deviceLocationManager else {return}
         
         switch deviceLocationManager.authorizationStatus {
@@ -51,4 +52,11 @@ class PinTaskViewModel: ObservableObject {
     }
     
     // TODO: methods to add and remove tasks
+}
+
+extension PinTaskViewModel: CLLocationManagerDelegate {
+    // gets called as soon as CLLocationManager is created (line 28)
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLocationAuth()
+    }
 }
