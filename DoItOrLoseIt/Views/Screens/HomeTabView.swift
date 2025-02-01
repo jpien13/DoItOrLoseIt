@@ -10,7 +10,7 @@ import SwiftData
 
 struct HomeTabView: View {
 
-    @StateObject private var viewModel = PinTaskViewModel()
+    @StateObject private var viewModel = PinTaskViewModel() // creates the 1 instance that acts as source of truth and persists for the lifetime of HomeTabView
     
     var body: some View {
         TabView {
