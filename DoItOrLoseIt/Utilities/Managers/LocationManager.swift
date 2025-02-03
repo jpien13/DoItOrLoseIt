@@ -5,17 +5,85 @@
 //  Created by Jason Pien on 2/1/25.
 //
 
-import Foundation
+import SwiftUI
+import MapKit
 
-// =============================================================
-// Managers are often used to encapsulate logic that doesn't fit
-// neatly into the MVVM pattern (Model-View-ViewModel) but is
-// still essential for the app's functionality.
-//
-// Managers are classes or objects designed to handle specific
-// tasks related to data management within your application,
-// like fetching data from an API, storing user settings,
-// or managing complex state across different views, often
-// utilizing the concept of "ObservableObject" to update the
-// UI whenever data changes within the manager.
-// =============================================================
+/*
+LocationManager
+
+Data Flow:
+1. App Entry (DoItOrLoseItApp.swift):
+   - Creates single LocationManager instance
+   - Injects into environment: .environmentObject(locationManager)
+
+2. MapView Usage (MapView.swift):
+   - Receives manager via @EnvironmentObject
+   - Calls checkIfLocationServicesIsEnable() on .onAppear
+   - Observes location changes through .onChange of userLocation coordinates
+   - Updates map region when coordinates change
+   - Displays alerts through @Published alertItem
+
+3. Location Updates (LocationManager.swift):
+   - checkIfLocationServicesIsEnable() -> sets up CLLocationManager
+   - CLLocationManagerDelegate callbacks:
+     → locationManagerDidChangeAuthorization -> checkLocationAuth()
+     → locationManager(didUpdateLocations) -> updates @Published userLocation
+
+ CLLocationManager (the delegator) needs to tell something when the location changes
+ LocationManager (the delegate) says "I'll handle those notifications"
+ When we set delegate = self, we're telling CLLocationManager: "Send all location updates to me"
+ When location changes happen, CLLocationManager automatically calls methods on our LocationManager through the delegate relationship
+*/
+
+final class LocationManager: NSObject, ObservableObject {
+    
+    @Published var alertItem: AlertItem?
+    @Published var userLocation: CLLocationCoordinate2D?
+    
+    // 1. Declare conformance to the delegate protocol
+    private var deviceLocationManager: CLLocationManager?
+
+    
+    // 3. 3. Set up the delegate relationship
+    func checkIfLocationServicesIsEnable() {
+        if CLLocationManager.locationServicesEnabled() {
+            deviceLocationManager = CLLocationManager()
+            deviceLocationManager!.delegate = self
+            deviceLocationManager?.desiredAccuracy = kCLLocationAccuracyBest
+        } else {
+            alertItem = AlertContext.locationDisabled
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        userLocation = locations.first?.coordinate
+    }
+
+    
+    private func checkLocationAuth() {
+        
+        guard let deviceLocationManager = deviceLocationManager else {return}
+        
+        switch deviceLocationManager.authorizationStatus {
+        case .notDetermined:
+            deviceLocationManager.requestWhenInUseAuthorization()
+        case .restricted:
+            alertItem = AlertContext.locationRestricted
+        case .denied:
+            alertItem = AlertContext.locationDenied
+        case .authorizedAlways, .authorizedWhenInUse:
+            deviceLocationManager.startUpdatingLocation()
+        @unknown default:
+            break
+            
+        }
+    }
+}
+
+// 2. Implement the delegate protocol
+extension LocationManager: CLLocationManagerDelegate {
+    // gets called as soon as CLLocationManager is created (line XX)
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkLocationAuth()
+    }
+}

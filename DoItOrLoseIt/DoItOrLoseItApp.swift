@@ -11,9 +11,12 @@ import SwiftData
 @main
 struct DoItOrLoseItApp: App {
     
+    let locationManager = LocationManager()
+    
     var body: some Scene {
         WindowGroup {
             HomeTabView()
+                .environmentObject(locationManager)
         }
     }
 }
