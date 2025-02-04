@@ -52,26 +52,22 @@ struct MapView: View {
                     userTrackingMode = .none
                 }
             )
-            RecenterButton{
-                isOnUserLocation = true
-                userTrackingMode = .follow
-                if let location = locationManager.userLocation {
-                    withAnimation {
-                        region.center = location
-                        region.span = MKCoordinateSpan(
-                            latitudeDelta: 0.005,
-                            longitudeDelta: 0.005
-                        )
-                    }
+            VStack {
+                Spacer()
+                    .frame(height: 60)
+                HStack {
+                    Spacer()
+                    RecenterButton(
+                        region: $region,
+                        isOnUserLocation: $isOnUserLocation,
+                        userTrackingMode: $userTrackingMode
+                    )
+                        .padding()
+                        .shadow(radius: 10)
                 }
+                Spacer()
             }
-                .padding()
-                .frame(
-                    maxWidth: .infinity,
-                    maxHeight: .infinity,
-                    alignment: .topTrailing
-                )
-                .shadow(radius: 10)
+            
             
         }
         .onAppear {
