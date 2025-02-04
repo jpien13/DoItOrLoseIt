@@ -39,6 +39,7 @@ final class LocationManager: NSObject, ObservableObject {
     
     @Published var alertItem: AlertItem?
     @Published var userLocation: CLLocationCoordinate2D?
+    @Published var isLocationReady = false
     
     // 1. Declare conformance to the delegate protocol
     private var deviceLocationManager: CLLocationManager?
@@ -56,7 +57,9 @@ final class LocationManager: NSObject, ObservableObject {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        userLocation = locations.first?.coordinate
+        guard let location = locations.last else { return }
+        userLocation = location.coordinate
+        isLocationReady = true
     }
 
     

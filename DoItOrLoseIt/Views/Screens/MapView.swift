@@ -13,6 +13,8 @@ import MapKit
 // (V in MVVM Model-View-ViewModel)
 // =============================================================
 
+// TODO: Track down and fix deprecated func/calls
+
 struct MapView: View {
     
     @EnvironmentObject var viewModel: PinTaskViewModel
@@ -28,33 +30,61 @@ struct MapView: View {
             longitudeDelta: 0.005
         )
     )
-        
+    
+    @State private var isOnUserLocation = true
+    @State private var userTrackingMode: MapUserTrackingMode = .follow
+    
     var body: some View {
         ZStack {
             Map(coordinateRegion: $region,
                 showsUserLocation: true,
-                userTrackingMode: .constant(.follow),
+                userTrackingMode: $userTrackingMode,
                 annotationItems: viewModel.pinTasks) { pinTask in
                 MapMarker(coordinate: CLLocationCoordinate2D(
                     latitude: pinTask.latitude,
                     longitude: pinTask.longitude
                 ))
-                
             }
+            .gesture(
+                DragGesture()
+                .onChanged{ _ in
+                    isOnUserLocation = false
+                    userTrackingMode = .none
+                }
+            )
+            RecenterButton{
+                isOnUserLocation = true
+                userTrackingMode = .follow
+                if let location = locationManager.userLocation {
+                    withAnimation {
+                        region.center = location
+                        region.span = MKCoordinateSpan(
+                            latitudeDelta: 0.005,
+                            longitudeDelta: 0.005
+                        )
+                    }
+                }
+            }
+                .padding()
+                .frame(
+                    maxWidth: .infinity,
+                    maxHeight: .infinity,
+                    alignment: .topTrailing
+                )
+                .shadow(radius: 10)
+            
         }
         .onAppear {
             locationManager.checkIfLocationServicesIsEnable()
-        }
-        .onChange(of: locationManager.userLocation?.latitude) { _ in
             if let location = locationManager.userLocation {
                 region.center = location
-                // TODO: check proximity to pinTask
+                userTrackingMode = .follow
             }
         }
-        .onChange(of: locationManager.userLocation?.longitude) { _ in
-            if let location = locationManager.userLocation {
+        .onChange(of: locationManager.isLocationReady) { ready in
+            if ready && isOnUserLocation, let location = locationManager.userLocation {
                 region.center = location
-                // TODO: check proximity to pinTask
+                userTrackingMode = .follow
             }
         }
         .alert(item: $locationManager.alertItem) { alertItem in
