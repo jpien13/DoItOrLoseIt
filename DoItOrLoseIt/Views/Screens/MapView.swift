@@ -49,8 +49,9 @@ struct MapView: View {
                 .onTapGesture { position in
                     if let coordinate = proxy.convert(position, from: .local) {
                         print(coordinate)
-                        let newPinTask = PinTask(longitude: coordinate.longitude, latitude: coordinate.latitude, wager: 1.00, deadline: "7:00 PM")
-                        viewModel.pinTasks.append(newPinTask)
+                        viewModel.addPinTask(coordinate: coordinate)
+                        print("new array...")
+                        print(viewModel.pinTasks)
                     }
                 }
                 .gesture(

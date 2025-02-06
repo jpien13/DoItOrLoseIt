@@ -19,9 +19,16 @@ import MapKit
 class PinTaskViewModel: NSObject, ObservableObject {
     
     @Published var alertItem: AlertItem?
-    @State var pinTasks: [PinTask] = MockData.pinTasks // @Published to notify Views of data changes
+    @Published var pinTasks = [PinTask]() // @Published to notify Views of data changes
     
-
+    func addPinTask(coordinate: CLLocationCoordinate2D) {
+        let newCoordinate = PinTask(longitude: coordinate.longitude,
+                                    latitude: coordinate.latitude,
+                                    wager: 12.34,
+                                    deadline: "This is a test")
+        print("adding new coordinate...")
+        pinTasks.append(newCoordinate)
+    }
 
 }
     // TODO: methods to add and remove tasks
