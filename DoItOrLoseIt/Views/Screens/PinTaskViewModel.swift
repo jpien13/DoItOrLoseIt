@@ -19,8 +19,12 @@ import MapKit
 class PinTaskViewModel: NSObject, ObservableObject {
     
     @Published var alertItem: AlertItem?
-    @Published var pinTasks: [PinTask] = MockData.pinTasks // @Published to notify Views of data changes
+    @State var pinTasks: [PinTask] = MockData.pinTasks // @Published to notify Views of data changes
+    
+
 
 }
     // TODO: methods to add and remove tasks
+
+
 

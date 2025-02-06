@@ -11,9 +11,8 @@ import MapKit
 struct RecenterButton: View {
     
     @EnvironmentObject private var locationManager: LocationManager
-    @Binding var region: MKCoordinateRegion
     @Binding var isOnUserLocation: Bool
-    @Binding var userTrackingMode: MapUserTrackingMode
+    @Binding var cameraPosition: MapCameraPosition
     @State private var didTap: Bool = false
     
     var body: some View {
@@ -41,15 +40,14 @@ struct RecenterButton: View {
     
     private func recenterToUserLocation() {
         isOnUserLocation = true
-        userTrackingMode = .follow
-        if let location = locationManager.userLocation {
-   
-        region.center = location
-        region.span = MKCoordinateSpan(
-            latitudeDelta: 0.005,
-            longitudeDelta: 0.005
-        )
-            
-        }
+        cameraPosition = .userLocation(fallback: .region(
+            MKCoordinateRegion(
+                center: locationManager.userLocation ?? CLLocationCoordinate2D(latitude: 0, longitude: 0),
+                span: MKCoordinateSpan(
+                    latitudeDelta: 0.005,
+                    longitudeDelta: 0.005
+                )
+            )
+        ))
     }
 }

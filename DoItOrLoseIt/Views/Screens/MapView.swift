@@ -31,36 +31,44 @@ struct MapView: View {
         )
     )
     
+    @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
     @State private var isOnUserLocation = true
-    @State private var userTrackingMode: MapUserTrackingMode = .follow
     
     var body: some View {
         ZStack {
-            Map(coordinateRegion: $region,
-                showsUserLocation: true,
-                userTrackingMode: $userTrackingMode,
-                annotationItems: viewModel.pinTasks) { pinTask in
-                MapMarker(coordinate: CLLocationCoordinate2D(
-                    latitude: pinTask.latitude,
-                    longitude: pinTask.longitude
-                ))
-            }
-            .gesture(
-                DragGesture()
-                .onChanged{ _ in
-                    isOnUserLocation = false
-                    userTrackingMode = .none
+            MapReader { proxy in
+                Map(position: $cameraPosition) {
+                    ForEach(viewModel.pinTasks) { pinTask in
+                        Marker("Task", coordinate: CLLocationCoordinate2D(
+                            latitude: pinTask.latitude,
+                            longitude: pinTask.longitude)
+                        )
+                    }
                 }
-            )
+                .mapStyle(.standard)
+                .onTapGesture { position in
+                    if let coordinate = proxy.convert(position, from: .local) {
+                        print(coordinate)
+                        let newPinTask = PinTask(longitude: coordinate.longitude, latitude: coordinate.latitude, wager: 1.00, deadline: "7:00 PM")
+                        viewModel.pinTasks.append(newPinTask)
+                    }
+                }
+                .gesture(
+                    DragGesture()
+                    .onChanged{ _ in
+                        isOnUserLocation = false
+                        cameraPosition = .automatic
+                    }
+                )
+            }
             VStack {
                 Spacer()
                     .frame(height: 60)
                 HStack {
                     Spacer()
                     RecenterButton(
-                        region: $region,
                         isOnUserLocation: $isOnUserLocation,
-                        userTrackingMode: $userTrackingMode
+                        cameraPosition: $cameraPosition
                     )
                         .padding()
                         .shadow(radius: 10)
@@ -72,15 +80,10 @@ struct MapView: View {
         }
         .onAppear {
             locationManager.checkIfLocationServicesIsEnable()
-            if let location = locationManager.userLocation {
-                region.center = location
-                userTrackingMode = .follow
-            }
         }
         .onChange(of: locationManager.isLocationReady) { ready in
-            if ready && isOnUserLocation, let location = locationManager.userLocation {
-                region.center = location
-                userTrackingMode = .follow
+            if ready && isOnUserLocation{
+                cameraPosition = .userLocation(fallback: .automatic)
             }
         }
         .alert(item: $locationManager.alertItem) { alertItem in

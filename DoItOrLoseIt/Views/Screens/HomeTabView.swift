@@ -41,4 +41,5 @@ struct HomeTabView: View {
 #Preview {
     HomeTabView()
         .environmentObject(PinTaskViewModel())
+        .environmentObject(LocationManager())
 }
