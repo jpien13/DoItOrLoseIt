@@ -39,8 +39,17 @@ struct MapView: View {
                     ForEach(viewModel.pinTasks) { pinTask in
                         Marker("Task", coordinate: CLLocationCoordinate2D(
                             latitude: pinTask.latitude,
-                            longitude: pinTask.longitude)
+                            longitude: pinTask.longitude
+                        ))
+                        MapCircle(
+                            center: CLLocationCoordinate2D(
+                                latitude: pinTask.latitude,
+                                longitude: pinTask.longitude
+                            ),
+                            radius: 50
                         )
+                        .foregroundStyle(.blue.opacity(0.30))
+                        .mapOverlayLevel(level: .aboveLabels)
                     }
                     UserAnnotation()
                 }
