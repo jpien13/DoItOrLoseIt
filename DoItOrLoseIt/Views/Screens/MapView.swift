@@ -42,6 +42,7 @@ struct MapView: View {
                             longitude: pinTask.longitude)
                         )
                     }
+                    UserAnnotation()
                 }
                 .mapStyle(.standard)
                 .onTapGesture { position in
@@ -55,7 +56,6 @@ struct MapView: View {
                     DragGesture()
                     .onChanged{ _ in
                         isOnUserLocation = false
-                        cameraPosition = .automatic
                     }
                 )
             }

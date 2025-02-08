@@ -28,6 +28,10 @@ class PinTaskViewModel: NSObject, ObservableObject {
                                     deadline: "This is a test")
         pinTasks.append(newCoordinate)
     }
+    
+    func removePinTask(_ task: PinTask) {
+        pinTasks.removeAll { $0.id == task.id }
+    }
 
 }
     // TODO: methods to add and remove tasks
