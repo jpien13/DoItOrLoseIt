@@ -13,8 +13,6 @@ import MapKit
 // (V in MVVM Model-View-ViewModel)
 // =============================================================
 
-// TODO: Track down and fix deprecated func/calls
-
 struct MapView: View {
     
     @EnvironmentObject var viewModel: PinTaskViewModel
@@ -48,10 +46,9 @@ struct MapView: View {
                 .mapStyle(.standard)
                 .onTapGesture { position in
                     if let coordinate = proxy.convert(position, from: .local) {
-                        print(coordinate)
                         viewModel.addPinTask(coordinate: coordinate)
-                        print("new array...")
-                        print(viewModel.pinTasks)
+                        // TODO: add circle
+                        // TODO: Add data persistance
                     }
                 }
                 .gesture(

@@ -26,7 +26,6 @@ class PinTaskViewModel: NSObject, ObservableObject {
                                     latitude: coordinate.latitude,
                                     wager: 12.34,
                                     deadline: "This is a test")
-        print("adding new coordinate...")
         pinTasks.append(newCoordinate)
     }
 

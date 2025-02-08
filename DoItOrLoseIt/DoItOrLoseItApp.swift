@@ -22,5 +22,4 @@ struct DoItOrLoseItApp: App {
 }
 
 
-// TODO: LocationManager: To handle all location-related logi. Use CLLocationManager to get the user's location and update the map's region
 // TODO: DataManager: To save PinTask items locally (UserDefaults or CoreData), need to create a DataManager to handle persistence. A class that saves and loads PinTask items from UserDefaults.
