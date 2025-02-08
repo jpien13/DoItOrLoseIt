@@ -84,6 +84,13 @@ struct MapView: View {
                 cameraPosition = .userLocation(fallback: .automatic)
             }
         }
+        .onChange(of: locationManager.userLocation) { newLocation in
+            if let newLocation = newLocation {
+                if let boundingBox = locationManager.calculateBoundingBox() {
+                    viewModel.removePinTasksWithin50Meters(userLocation: newLocation, boundingbox: boundingBox)
+                }
+            }
+        }
         .alert(item: $locationManager.alertItem) { alertItem in
             Alert(
                 title: alertItem.title,

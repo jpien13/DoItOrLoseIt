@@ -91,15 +91,14 @@ extension LocationManager: CLLocationManagerDelegate {
         checkLocationAuth()
     }
     
-    func calculateBoundingBox() -> (southwest: CLLocationCoordinate2D, northEast: CLLocationCoordinate2D)? {
-        let pi = 3.14159
+    func calculateBoundingBox() -> (southWest: CLLocationCoordinate2D, northEast: CLLocationCoordinate2D)? {
         // Haversine Formula
         guard let userlocation = userLocation else { return nil }
         let radiusInMeters: CLLocationDistance = 50
         let earthRadiusInMeters: CLLocationDistance = 6378137.0
         
-        let latitude = userlocation.latitude * pi / 180
-        let longitude = userlocation.longitude * pi / 180
+        let latitude = userlocation.latitude * .pi / 180
+        let longitude = userlocation.longitude * .pi / 180
         let angularDistance = radiusInMeters / earthRadiusInMeters
         let SouthWestLatitude = latitude - angularDistance
         let SouthWestLongitude = longitude - angularDistance / cos(latitude)
@@ -108,12 +107,12 @@ extension LocationManager: CLLocationManagerDelegate {
         
         // Convert to degrees
         let southWest = CLLocationCoordinate2D(
-            latitude: SouthWestLatitude * 180.0 / pi,
-            longitude: SouthWestLongitude * 180.0 / pi
+            latitude: SouthWestLatitude * 180.0 / .pi,
+            longitude: SouthWestLongitude * 180.0 / .pi
         )
         let northEast = CLLocationCoordinate2D(
-            latitude: NorthEastLatitude * 180.0 / pi,
-            longitude: NorthEastLongitude * 180.0 / pi
+            latitude: NorthEastLatitude * 180.0 / .pi,
+            longitude: NorthEastLongitude * 180.0 / .pi
         )
         
         return (southWest, northEast)
