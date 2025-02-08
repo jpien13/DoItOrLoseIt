@@ -30,7 +30,7 @@ struct TaskItemView: View {
             
             
         }
-        .frame(width: .infinity, height: 60)
+        .frame(width: 350, height: 60)
         .foregroundColor(Color.black)
         .background(Color.white)
         .cornerRadius(10)
