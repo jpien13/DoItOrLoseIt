@@ -27,8 +27,10 @@ struct LocationUtils {
     }
 }
 
-extension CLLocationCoordinate2D: Equatable {
-    public static func == (lhs: CLLocationCoordinate2D, rhs: CLLocationCoordinate2D) -> Bool {
-        return lhs.latitude == rhs.latitude && lhs.longitude == rhs.longitude
+struct CoordinateWrapper: Equatable {
+    let coordinate: CLLocationCoordinate2D
+    
+    static func == (lhs: CoordinateWrapper, rhs: CoordinateWrapper) -> Bool {
+        return lhs.coordinate.latitude == rhs.coordinate.latitude && lhs.coordinate.longitude == rhs.coordinate.longitude
     }
 }

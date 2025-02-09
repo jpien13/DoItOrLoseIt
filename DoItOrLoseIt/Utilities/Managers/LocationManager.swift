@@ -8,61 +8,84 @@
 import SwiftUI
 import MapKit
 
-/*
-LocationManager
-
-Data Flow:
-1. App Entry (DoItOrLoseItApp.swift):
-   - Creates single LocationManager instance
-   - Injects into environment: .environmentObject(locationManager)
-
-2. MapView Usage (MapView.swift):
-   - Receives manager via @EnvironmentObject
-   - Calls checkIfLocationServicesIsEnable() on .onAppear
-   - Observes location changes through .onChange of userLocation coordinates
-   - Updates map region when coordinates change
-   - Displays alerts through @Published alertItem
-
-3. Location Updates (LocationManager.swift):
-   - checkIfLocationServicesIsEnable() -> sets up CLLocationManager
-   - CLLocationManagerDelegate callbacks:
-     → locationManagerDidChangeAuthorization -> checkLocationAuth()
-     → locationManager(didUpdateLocations) -> updates @Published userLocation
-
- CLLocationManager (the delegator) needs to tell something when the location changes
- LocationManager (the delegate) says "I'll handle those notifications"
- When we set delegate = self, we're telling CLLocationManager: "Send all location updates to me"
- When location changes happen, CLLocationManager automatically calls methods on our LocationManager through the delegate relationship
-*/
+/**
+ * LocationManager is responsible for handling all location-related functionality in the application.
+ * It manages user location updates, authorization status, and provides geographic calculations.
+ *
+ * The class implements CLLocationManagerDelegate to receive location updates and authorization changes.
+ * It uses the Observable Object pattern to publish changes to the SwiftUI view hierarchy.
+ *
+ * Key Features:
+ * - Handles location services availability checking
+ * - Manages location authorization status
+ * - Provides real-time user location updates
+ * - Calculates geographic boundaries for geofencing
+ */
 
 final class LocationManager: NSObject, ObservableObject {
     
     @Published var alertItem: AlertItem?
-    @Published var userLocation: CLLocationCoordinate2D?
+    @Published var userLocation: CoordinateWrapper?
     @Published var isLocationReady = false
     
-    // 1. Declare conformance to the delegate protocol
     private var deviceLocationManager: CLLocationManager?
 
-    
-    // 3. 3. Set up the delegate relationship
+    /**
+     * Verifies if location services are enabled on the device and sets up the location manager.
+     *
+     * This method performs the following:
+     * 1. Checks if system location services are enabled
+     * 2. Initializes the device location manager if services are available
+     * 3. Sets up the delegate and accuracy settings
+     * 4. Triggers a location authorization check
+     *
+     * The operation is performed on a background thread to avoid blocking the main thread,
+     * with UI updates being dispatched back to the main thread.
+     */
     func checkIfLocationServicesIsEnable() {
-        if CLLocationManager.locationServicesEnabled() {
-            deviceLocationManager = CLLocationManager()
-            deviceLocationManager!.delegate = self
-            deviceLocationManager?.desiredAccuracy = kCLLocationAccuracyBest
-        } else {
-            alertItem = AlertContext.locationDisabled
+        DispatchQueue.global(qos: .userInitiated).async {
+            let isLocationEnabled = CLLocationManager.locationServicesEnabled()
+            DispatchQueue.main.async {
+                if isLocationEnabled {
+                    self.deviceLocationManager = CLLocationManager()
+                    self.deviceLocationManager!.delegate = self
+                    self.deviceLocationManager?.desiredAccuracy = kCLLocationAccuracyBest
+                    self.checkLocationAuth()
+                } else {
+                    self.alertItem = AlertContext.locationDisabled
+                }
+            }
         }
     }
     
+    /**
+     * CLLocationManagerDelegate method that handles incoming location updates.
+     *
+     * When new location data is received:
+     * 1. Extracts the most recent location from the provided array
+     * 2. Updates the published userLocation property
+     * 3. Sets isLocationReady to true to indicate active location services
+     *
+     * Parameters:
+     * - manager: The location manager providing the update
+     * - locations: Array of location objects, typically containing historical and current locations
+     */
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        userLocation = location.coordinate
+        userLocation = CoordinateWrapper(coordinate: location.coordinate)
         isLocationReady = true
     }
 
-    
+    /**
+    * Verifies and handles the current location authorization status.
+    *
+    * This private method:
+    * 1. Checks the current authorization status
+    * 2. Handles each possible authorization state appropriately
+    * 3. Requests authorization if needed
+    * 4. Sets appropriate alert items for restricted or denied states
+    * 5. Begins location updates when authorized
+    */
     private func checkLocationAuth() {
         
         guard let deviceLocationManager = deviceLocationManager else {return}
@@ -83,17 +106,34 @@ final class LocationManager: NSObject, ObservableObject {
     }
 }
 
-// 2. Implement the delegate protocol
-// functions in extension contains additional utility functions that are related to location calculations but are not part of the core functionality
 extension LocationManager: CLLocationManagerDelegate {
-    // gets called as soon as CLLocationManager is created (line XX)
+    /**
+     * Delegate method called when location authorization status changes.
+     *
+     * Triggers a recheck of location authorization when the status changes,
+     * ensuring the app responds appropriately to user permission changes.
+     */
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         checkLocationAuth()
     }
-    
+    /**
+     * Calculates a bounding box around the user's current location.
+     *
+     * Uses the Haversine formula to calculate a square boundary around the user's location.
+     * The calculation takes into account the Earth's curvature and provides coordinates
+     * for the southwest and northeast corners of the bounding box.
+     *
+     * The bounding box has the following properties:
+     * - Centered on the user's current location
+     * - Radius: 50 meters from the center point
+     * - Accounts for Earth's curvature in the calculation
+     *
+     * Returns: A tuple containing the southwest and northeast coordinates of the bounding box,
+     *          or nil if the user's location is not available
+     */
     func calculateBoundingBox() -> (southWest: CLLocationCoordinate2D, northEast: CLLocationCoordinate2D)? {
         // Haversine Formula
-        guard let userlocation = userLocation else { return nil }
+        guard let userlocation = userLocation?.coordinate else { return nil }
         let radiusInMeters: CLLocationDistance = 50
         let earthRadiusInMeters: CLLocationDistance = 6378137.0
         

@@ -42,7 +42,7 @@ struct RecenterButton: View {
         isOnUserLocation = true
         cameraPosition = .userLocation(fallback: .region(
             MKCoordinateRegion(
-                center: locationManager.userLocation ?? CLLocationCoordinate2D(latitude: 0, longitude: 0),
+                center: locationManager.userLocation?.coordinate ?? CLLocationCoordinate2D(latitude: 0, longitude: 0),
                 span: MKCoordinateSpan(
                     latitudeDelta: 0.005,
                     longitudeDelta: 0.005

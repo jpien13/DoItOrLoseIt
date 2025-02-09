@@ -88,13 +88,13 @@ struct MapView: View {
         .onAppear {
             locationManager.checkIfLocationServicesIsEnable()
         }
-        .onChange(of: locationManager.isLocationReady) { ready in
-            if ready && isOnUserLocation{
+        .onChange(of: locationManager.isLocationReady) { oldValue, newValue in
+            if newValue && isOnUserLocation{
                 cameraPosition = .userLocation(fallback: .automatic)
             }
         }
-        .onChange(of: locationManager.userLocation) { newLocation in
-            if let newLocation = newLocation {
+        .onChange(of: locationManager.userLocation) { oldValue, newValue in
+            if let newLocation = newValue?.coordinate {
                 if let boundingBox = locationManager.calculateBoundingBox() {
                     viewModel.removePinTasksWithin50Meters(userLocation: newLocation, boundingbox: boundingBox)
                 }

@@ -14,13 +14,14 @@ import Foundation
 
 struct PinTask: Codable, Equatable, Hashable, Identifiable {
     
-    let id = UUID()
+    let id: UUID
     let longitude: Double
     let latitude: Double
     let wager: Double
     let deadline: String
     
     init(longitude: Double, latitude: Double, wager: Double, deadline: String) {
+        self.id = UUID()
         self.longitude = longitude
         self.latitude = latitude
         self.wager = wager
