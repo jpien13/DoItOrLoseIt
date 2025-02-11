@@ -10,13 +10,16 @@ import SwiftData
 
 @main
 struct DoItOrLoseItApp: App {
-    
+    // MARK: Core data
+    @StateObject private var manager: DataManager = DataManager()
     let locationManager = LocationManager()
     
     var body: some Scene {
         WindowGroup {
             HomeTabView()
                 .environmentObject(locationManager)
+                .environmentObject(manager)
+                .environment(\.managedObjectContext, manager.container.viewContext)
         }
     }
 }
