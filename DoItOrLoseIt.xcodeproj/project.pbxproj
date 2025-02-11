@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A7CB2C1B2D5BEE270000DC80 /* PinTaskList.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A7CB2C192D5BEE270000DC80 /* PinTaskList.xcdatamodeld */; };
+		A7CB2C1E2D5BEF220000DC80 /* PinTask+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7CB2C1C2D5BEF220000DC80 /* PinTask+CoreDataClass.swift */; };
+		A7CB2C1F2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7CB2C1D2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A79B33442D42C9E100E376E2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +33,9 @@
 		A79B33312D42C9DF00E376E2 /* DoItOrLoseIt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoItOrLoseIt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A79B33432D42C9E100E376E2 /* DoItOrLoseItTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoItOrLoseItTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A79B334D2D42C9E100E376E2 /* DoItOrLoseItUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoItOrLoseItUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A7CB2C1A2D5BEE270000DC80 /* PinTaskList.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = PinTaskList.xcdatamodel; sourceTree = "<group>"; };
+		A7CB2C1C2D5BEF220000DC80 /* PinTask+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PinTask+CoreDataClass.swift"; sourceTree = "<group>"; };
+		A7CB2C1D2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PinTask+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +84,9 @@
 		A79B33282D42C9DF00E376E2 = {
 			isa = PBXGroup;
 			children = (
+				A7CB2C1C2D5BEF220000DC80 /* PinTask+CoreDataClass.swift */,
+				A7CB2C1D2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift */,
+				A7CB2C192D5BEE270000DC80 /* PinTaskList.xcdatamodeld */,
 				A79B33332D42C9DF00E376E2 /* DoItOrLoseIt */,
 				A79B33462D42C9E100E376E2 /* DoItOrLoseItTests */,
 				A79B33502D42C9E100E376E2 /* DoItOrLoseItUITests */,
@@ -236,6 +248,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A7CB2C1E2D5BEF220000DC80 /* PinTask+CoreDataClass.swift in Sources */,
+				A7CB2C1F2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift in Sources */,
+				A7CB2C1B2D5BEE270000DC80 /* PinTaskList.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -560,6 +575,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		A7CB2C192D5BEE270000DC80 /* PinTaskList.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				A7CB2C1A2D5BEE270000DC80 /* PinTaskList.xcdatamodel */,
+			);
+			currentVersion = A7CB2C1A2D5BEE270000DC80 /* PinTaskList.xcdatamodel */;
+			path = PinTaskList.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = A79B33292D42C9DF00E376E2 /* Project object */;
 }

@@ -12,7 +12,7 @@ import Foundation
 // (M in MVVM Model-View-ViewModel)
 // ============================================
 
-struct PinTask: Codable, Equatable, Hashable, Identifiable {
+struct PinTaskDummy: Codable, Equatable, Hashable, Identifiable {
     
     let id: UUID
     let longitude: Double

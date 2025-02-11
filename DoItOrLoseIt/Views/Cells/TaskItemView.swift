@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TaskItemView: View {
     
-    var pinTask: PinTask
+    var pinTask: PinTaskDummy
     @EnvironmentObject var viewModel: PinTaskViewModel
     
     var body: some View {

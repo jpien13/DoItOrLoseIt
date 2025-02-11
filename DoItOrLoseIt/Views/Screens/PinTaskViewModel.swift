@@ -19,21 +19,21 @@ import MapKit
 class PinTaskViewModel: NSObject, ObservableObject {
     
     @Published var alertItem: AlertItem?
-    @Published var pinTasks = [PinTask]() // @Published to notify Views of data changes
+    @Published var pinTasks = [PinTaskDummy]() // @Published to notify Views of data changes
     
     func addPinTask(coordinate: CLLocationCoordinate2D) {
-        let newCoordinate = PinTask(longitude: coordinate.longitude,
+        let newCoordinate = PinTaskDummy(longitude: coordinate.longitude,
                                     latitude: coordinate.latitude,
                                     wager: 12.34,
                                     deadline: "This is a test")
         pinTasks.append(newCoordinate)
     }
     
-    func removePinTask(_ task: PinTask) {
+    func removePinTask(_ task: PinTaskDummy) {
         pinTasks.removeAll { $0.id == task.id }
     }
     
-    func filterPinTasksInBoundingBox(boundingBox: (southWest: CLLocationCoordinate2D, northEast: CLLocationCoordinate2D)) -> [PinTask] {
+    func filterPinTasksInBoundingBox(boundingBox: (southWest: CLLocationCoordinate2D, northEast: CLLocationCoordinate2D)) -> [PinTaskDummy] {
         return pinTasks.filter { pinTask in
             
             let isLatitudeInRange = pinTask.latitude >= boundingBox.southWest.latitude &&
