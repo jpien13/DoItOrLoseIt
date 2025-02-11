@@ -15,6 +15,8 @@ import SwiftUI
 struct TaskListView: View {
     
     @EnvironmentObject var viewModel: PinTaskViewModel
+    @EnvironmentObject var manager: DataManager
+    @Environment(\.managedObjectContext) var viewContext
     
     var body: some View {
         

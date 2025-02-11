@@ -31,6 +31,8 @@ struct MapView: View {
     
     @State private var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
     @State private var isOnUserLocation = true
+    @State private var showingAddSheet = false
+    @State private var selectedCoordinate: CLLocationCoordinate2D?
     
     var body: some View {
         ZStack {
@@ -56,9 +58,8 @@ struct MapView: View {
                 .mapStyle(.standard)
                 .onTapGesture { position in
                     if let coordinate = proxy.convert(position, from: .local) {
-                        viewModel.addPinTask(coordinate: coordinate)
-                        // TODO: add circle
-                        // TODO: Add data persistance
+                        selectedCoordinate = coordinate
+                        showingAddSheet = true
                     }
                 }
                 .gesture(
@@ -85,6 +86,15 @@ struct MapView: View {
             
             
         }
+        .sheet(isPresented: $showingAddSheet, content:{
+            if let coordinate = selectedCoordinate {
+                PinTaskInputForm(
+                    coordinate: coordinate,
+                    onSave: {coordinate in
+                        viewModel.addPinTask(coordinate: coordinate)
+                    })
+            }
+        })
         .onAppear {
             locationManager.checkIfLocationServicesIsEnable()
         }
