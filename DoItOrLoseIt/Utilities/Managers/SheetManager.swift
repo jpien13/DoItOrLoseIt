@@ -6,3 +6,7 @@
 //
 
 import SwiftUI
+
+class SheetManager: ObservableObject{
+    @Published var showSheet = false
+}

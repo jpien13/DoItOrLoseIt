@@ -18,6 +18,7 @@ struct MapView: View {
     @EnvironmentObject var viewModel: PinTaskViewModel
     @EnvironmentObject private var locationManager: LocationManager
     
+    
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(
             latitude: 41.826084,
@@ -33,6 +34,8 @@ struct MapView: View {
     @State private var isOnUserLocation = true
     @State private var showingAddSheet = false
     @State private var selectedCoordinate: CLLocationCoordinate2D?
+    
+    @StateObject var sheetManager = SheetManager()
     
     var body: some View {
         ZStack {
@@ -59,7 +62,7 @@ struct MapView: View {
                 .onTapGesture { position in
                     if let coordinate = proxy.convert(position, from: .local) {
                         selectedCoordinate = coordinate
-                        showingAddSheet = true
+                        sheetManager.showSheet = true
                     }
                 }
                 .gesture(
@@ -86,7 +89,7 @@ struct MapView: View {
             
             
         }
-        .sheet(isPresented: $showingAddSheet, content:{
+        .sheet(isPresented: $sheetManager.showSheet, content:{
             if let coordinate = selectedCoordinate {
                 PinTaskInputForm(
                     coordinate: coordinate,
