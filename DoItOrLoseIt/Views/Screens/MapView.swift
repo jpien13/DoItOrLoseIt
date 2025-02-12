@@ -15,8 +15,10 @@ import MapKit
 
 struct MapView: View {
     
-    @EnvironmentObject var viewModel: PinTaskViewModel
+    //@EnvironmentObject var viewModel: PinTaskViewModel
+    @Environment(\.managedObjectContext) var viewContext
     @EnvironmentObject private var locationManager: LocationManager
+    @EnvironmentObject var dataManager: DataManager
     
     
     @State private var region = MKCoordinateRegion(
@@ -37,11 +39,14 @@ struct MapView: View {
     
     @StateObject var sheetManager = SheetManager()
     
+    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \PinTask.deadline, ascending: true)])
+    private var pinTasks: FetchedResults<PinTask>
+    
     var body: some View {
         ZStack {
             MapReader { proxy in
                 Map(position: $cameraPosition) {
-                    ForEach(viewModel.pinTasks) { pinTask in
+                    ForEach(pinTasks, id: \.self) { pinTask in
                         Marker("Task", coordinate: CLLocationCoordinate2D(
                             latitude: pinTask.latitude,
                             longitude: pinTask.longitude
@@ -94,7 +99,7 @@ struct MapView: View {
                 PinTaskInputForm(
                     coordinate: coordinate,
                     onSave: {coordinate in
-                        viewModel.addPinTask(coordinate: coordinate)
+                        
                     })
             }
         })
@@ -107,10 +112,13 @@ struct MapView: View {
             }
         }
         .onChange(of: locationManager.userLocation) { oldValue, newValue in
-            if let newLocation = newValue?.coordinate {
-                if let boundingBox = locationManager.calculateBoundingBox() {
-                    viewModel.removePinTasksWithin50Meters(userLocation: newLocation, boundingbox: boundingBox)
-                }
+            if let locationWrapper = newValue,
+               let boundingBox = locationManager.calculateBoundingBox() {
+                dataManager.removePinTasksWithin50Meters(
+                    userLocation: locationWrapper.coordinate,
+                    boundingbox: boundingBox,
+                    context: viewContext
+                )
             }
         }
         .alert(item: $locationManager.alertItem) { alertItem in
@@ -120,16 +128,21 @@ struct MapView: View {
                 dismissButton: alertItem.dismissButton
             )
         }
-        .alert(item: $viewModel.alertItem) { alertItem in
+        .alert(item: $dataManager.alertItem) { alertItem in
             Alert(title: alertItem.title,
                       message: alertItem.message,
                       dismissButton: alertItem.dismissButton)
         }
     }
+    
+    
+    
 }
 
 #Preview {
+    let dataManager = DataManager()
     MapView()
-        .environmentObject(PinTaskViewModel())
+        .environmentObject(dataManager)
         .environmentObject(LocationManager())
+        .environment(\.managedObjectContext, dataManager.container.viewContext)
 }
