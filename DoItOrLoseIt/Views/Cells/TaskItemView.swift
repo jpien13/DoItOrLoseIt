@@ -8,9 +8,10 @@
 import SwiftUI
 
 struct TaskItemView: View {
+    @Environment(\.managedObjectContext) var viewContext
+    @EnvironmentObject var dataManager: DataManager
     
-    var pinTask: PinTaskDummy
-    @EnvironmentObject var viewModel: PinTaskViewModel
+    let pinTask: PinTask
     
     var body: some View {
        
@@ -23,7 +24,9 @@ struct TaskItemView: View {
             }
             .padding(.horizontal)
             HStack {
-                Text(String(pinTask.deadline))
+                if let deadline = pinTask.deadline {
+                    Text(formatDate(deadline))
+                }
                 Spacer()
             }
             .padding(.horizontal)
@@ -38,8 +41,11 @@ struct TaskItemView: View {
         .shadow(radius: 3)
     
     }
-}
-
-#Preview {
-    TaskItemView(pinTask: MockData.samplePinTask)
+    
+    private func formatDate(_ date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            formatter.timeStyle = .short
+            return formatter.string(from: date)
+        }
 }

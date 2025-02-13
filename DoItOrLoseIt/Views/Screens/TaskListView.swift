@@ -18,6 +18,9 @@ struct TaskListView: View {
     @EnvironmentObject var manager: DataManager
     @Environment(\.managedObjectContext) var viewContext
     
+    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \PinTask.deadline, ascending: true)])
+    private var pinTasks: FetchedResults<PinTask>
+    
     var body: some View {
         
         NavigationView(){
@@ -26,9 +29,9 @@ struct TaskListView: View {
                     Spacer()
                         .frame(height: 20)
                     
-                    ForEach(viewModel.pinTasks, id: \.id) { pinTaskItem in
-                        NavigationLink(value: pinTaskItem) {
-                            TaskItemView(pinTask: pinTaskItem)
+                    ForEach(pinTasks, id: \.self) { pinTask in
+                        NavigationLink(value: pinTask) {
+                            TaskItemView(pinTask: pinTask)
                         }
                     }
                     
