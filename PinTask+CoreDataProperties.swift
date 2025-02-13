@@ -15,7 +15,7 @@ extension PinTask {
     @nonobjc public class func fetchRequest() -> NSFetchRequest<PinTask> {
         return NSFetchRequest<PinTask>(entityName: "PinTask")
     }
-
+    @NSManaged public var title: String?
     @NSManaged public var deadline: Date?
     @NSManaged public var id: UUID?
     @NSManaged public var longitude: Double

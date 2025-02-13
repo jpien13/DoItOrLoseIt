@@ -10,7 +10,8 @@ import SwiftData
 
 struct HomeTabView: View {
 
-    @StateObject private var viewModel = PinTaskViewModel() // creates the 1 instance that acts as source of truth and persists for the lifetime of HomeTabView
+    @EnvironmentObject private var locationManager: LocationManager
+    @EnvironmentObject private var dataManager: DataManager
     
     var body: some View {
         TabView {
@@ -20,13 +21,13 @@ struct HomeTabView: View {
                     Text("Balance")
                 }
             TaskListView()
-                .environmentObject(viewModel) // inject ViewModel into this view so this view has 1 shared source of truth
+                .environment(\.managedObjectContext, dataManager.container.viewContext)
                 .tabItem {
                     Image(systemName: "checklist")
                     Text("Tasks")
                 }
             MapView()
-                .environmentObject(viewModel) // inject ViewModel into this view so this view has 1 shared source of truth
+                .environment(\.managedObjectContext, dataManager.container.viewContext)
                 .tabItem {
                     Image(systemName: "map")
                     Text("Map")
@@ -39,7 +40,9 @@ struct HomeTabView: View {
 }
 
 #Preview {
+    let dataManager = DataManager()
     HomeTabView()
-        .environmentObject(PinTaskViewModel())
         .environmentObject(LocationManager())
+        .environmentObject(DataManager())
+        .environment(\.managedObjectContext, dataManager.container.viewContext)
 }

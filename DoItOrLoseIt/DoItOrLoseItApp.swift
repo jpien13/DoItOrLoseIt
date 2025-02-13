@@ -12,7 +12,7 @@ import SwiftData
 struct DoItOrLoseItApp: App {
     // MARK: Core data
     @StateObject private var dataManager: DataManager = DataManager()
-    let locationManager = LocationManager()
+    @StateObject private var locationManager = LocationManager()
     
     var body: some Scene {
         WindowGroup {
@@ -25,5 +25,7 @@ struct DoItOrLoseItApp: App {
 }
 
 
-// TODO: DataManager: To save PinTask items locally (UserDefaults or CoreData), need to create a DataManager to handle persistence. A class that saves and loads PinTask items from UserDefaults.
-// TODO: Watch add to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.
+// TODO: Add deadline
+// TODO: Add wager subtract and balance
+// TODO: Watch ad to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.
+

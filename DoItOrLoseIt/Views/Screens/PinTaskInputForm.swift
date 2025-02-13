@@ -20,6 +20,7 @@ struct PinTaskInputForm: View {
     
     @State private var wager: Double = 0.0
     @State private var deadline: Date = Date()
+    @State private var title: String = "My Task"
     
     var body: some View {
         NavigationView {
@@ -29,6 +30,7 @@ struct PinTaskInputForm: View {
                     Text("Longitude: \(coordinate.longitude)")
                 }
                 Section(header: Text("Task Details")) {
+                    TextField("Task Name", text: $title)
                     HStack {
                         Text("$")
                         TextField("Wager Amount", value: $wager, format: .number)
@@ -59,6 +61,7 @@ struct PinTaskInputForm: View {
         pinTask.longitude = self.coordinate.longitude
         pinTask.wager = self.wager
         pinTask.deadline = self.deadline
+        pinTask.title = self.title
         
         do {
             try self.viewContext.save()

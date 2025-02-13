@@ -17,8 +17,13 @@ struct TaskItemView: View {
        
         VStack {
             HStack{
-                (Text("📍" + String(pinTask.latitude)) + Text(", ") + Text(String(pinTask.longitude)))
+                Text("📍" + String(pinTask.title ?? "My Task"))
                     .fontWeight(.bold)
+                Spacer()
+            }
+            .padding(.horizontal)
+            HStack{
+                (Text(String(pinTask.latitude)) + Text(", ") + Text(String(pinTask.longitude)))
                 Spacer()
                 Text("$ ") + Text(String(format: "%.2f", pinTask.wager))
             }
@@ -33,7 +38,7 @@ struct TaskItemView: View {
             
             
         }
-        .frame(width: 350, height: 60)
+        .frame(width: 350, height: 90)
         .foregroundColor(Color.black)
         .background(Color.white)
         .cornerRadius(10)

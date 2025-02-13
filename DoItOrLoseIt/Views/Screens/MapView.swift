@@ -47,7 +47,7 @@ struct MapView: View {
             MapReader { proxy in
                 Map(position: $cameraPosition) {
                     ForEach(pinTasks, id: \.self) { pinTask in
-                        Marker("Task", coordinate: CLLocationCoordinate2D(
+                        Marker(pinTask.title ?? "My Task", coordinate: CLLocationCoordinate2D(
                             latitude: pinTask.latitude,
                             longitude: pinTask.longitude
                         ))
