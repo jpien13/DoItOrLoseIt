@@ -16,7 +16,6 @@ extension PinTask {
         return NSFetchRequest<PinTask>(entityName: "PinTask")
     }
 
-    @NSManaged public var status: String?
     @NSManaged public var deadline: Date?
     @NSManaged public var id: UUID?
     @NSManaged public var longitude: Double
