@@ -63,6 +63,12 @@ struct MapView: View {
                     }
                     UserAnnotation()
                 }
+                .onAppear {
+                    locationManager.startMonitoringPinTasks(Array(pinTasks))
+                }
+                .onChange(of: viewContext.hasChanges) {
+                    locationManager.startMonitoringPinTasks(Array(pinTasks))
+                }
                 .mapStyle(.standard)
                 .onTapGesture { position in
                     if let coordinate = proxy.convert(position, from: .local) {

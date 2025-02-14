@@ -93,3 +93,26 @@ class DataManager: NSObject, ObservableObject {
         }
     }
 }
+
+extension DataManager {
+    func deletePinTask(withId id: UUID?) {
+        guard let id = id else { return }
+        
+        let fetchRequest: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        
+        do {
+            let results = try container.viewContext.fetch(fetchRequest)
+            if let taskToDelete = results.first {
+                container.viewContext.delete(taskToDelete)
+                try container.viewContext.save()
+            }
+        } catch {
+            alertItem = AlertItem(
+                title: Text("Error"),
+                message: Text("Unable to delete completed task."),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+    }
+}

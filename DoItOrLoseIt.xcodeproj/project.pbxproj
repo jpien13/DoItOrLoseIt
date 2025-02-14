@@ -428,6 +428,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DoItOrLoseIt/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "App needs location to verify completion of tasks. Even when app is closed.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "App needs location to verify completion of tasks. Even when app is closed.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location Info Needed to verify task completion";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -460,6 +463,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DoItOrLoseIt/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "App needs location to verify completion of tasks. Even when app is closed.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "App needs location to verify completion of tasks. Even when app is closed.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location Info Needed to verify task completion";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

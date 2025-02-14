@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import CoreLocation
 
 /**
  * LocationManager is responsible for handling all location-related functionality in the application.
@@ -29,6 +30,7 @@ final class LocationManager: NSObject, ObservableObject {
     @Published var isLocationReady = false
     
     private var deviceLocationManager: CLLocationManager?
+    private var monitoredRegions: Set<CLCircularRegion> = []
 
     /**
      * Verifies if location services are enabled on the device and sets up the location manager.
@@ -58,6 +60,33 @@ final class LocationManager: NSObject, ObservableObject {
         }
     }
     
+    func startMonitoringPinTasks(_ pinTasks: [PinTask]) {
+        guard let deviceLocationManager = deviceLocationManager else { return }
+        
+        // Remove all existing monitored regions
+        for region in deviceLocationManager.monitoredRegions {
+            deviceLocationManager.stopMonitoring(for: region)
+        }
+        
+        for pinTask in pinTasks {
+            // Create a circular region with 50-meter radius
+            let center = CLLocationCoordinate2D(latitude: pinTask.latitude, longitude: pinTask.longitude)
+            
+            // Use pinTask.id as identifier for the region
+            guard let id = pinTask.id?.uuidString else { continue }
+            
+            let region = CLCircularRegion(center: center, radius: 50, identifier: id)
+            region.notifyOnEntry = true
+            region.notifyOnExit = false
+            
+            // Start monitoring the region
+            if CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) {
+                deviceLocationManager.startMonitoring(for: region)
+                monitoredRegions.insert(region)
+            }
+        }
+    }
+        
     /**
      * CLLocationManagerDelegate method that handles incoming location updates.
      *
@@ -74,6 +103,21 @@ final class LocationManager: NSObject, ObservableObject {
         guard let location = locations.last else { return }
         userLocation = CoordinateWrapper(coordinate: location.coordinate)
         isLocationReady = true
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
+        guard let circularRegion = region as? CLCircularRegion else { return }
+        
+        // Handle region entry - delete the corresponding PinTask
+        DispatchQueue.main.async {
+            if let viewContext = self.deviceLocationManager?.delegate as? DataManager {
+                viewContext.deletePinTask(withId: UUID(uuidString: region.identifier))
+            }
+        }
+        
+        // Stop monitoring this region since the task is complete
+        manager.stopMonitoring(for: region)
+        monitoredRegions.remove(circularRegion)
     }
 
     /**
@@ -92,13 +136,15 @@ final class LocationManager: NSObject, ObservableObject {
         
         switch deviceLocationManager.authorizationStatus {
         case .notDetermined:
-            deviceLocationManager.requestWhenInUseAuthorization()
+            deviceLocationManager.requestAlwaysAuthorization()
         case .restricted:
             alertItem = AlertContext.locationRestricted
         case .denied:
             alertItem = AlertContext.locationDenied
         case .authorizedAlways, .authorizedWhenInUse:
             deviceLocationManager.startUpdatingLocation()
+            deviceLocationManager.allowsBackgroundLocationUpdates = true
+            deviceLocationManager.pausesLocationUpdatesAutomatically = false
         @unknown default:
             break
             
