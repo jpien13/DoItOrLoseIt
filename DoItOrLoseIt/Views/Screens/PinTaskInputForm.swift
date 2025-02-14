@@ -18,7 +18,7 @@ struct PinTaskInputForm: View {
     let coordinate: CLLocationCoordinate2D
     var onSave: (CLLocationCoordinate2D) -> Void
     
-    @State private var wager: Double = 0.0
+    @State private var challengeAmount: Double = 0.0
     @State private var deadline: Date = Date()
     @State private var title: String = "My Task"
     
@@ -33,7 +33,7 @@ struct PinTaskInputForm: View {
                     TextField("Task Name", text: $title)
                     HStack {
                         Text("$")
-                        TextField("Wager Amount", value: $wager, format: .number)
+                        TextField("challengeAmount Amount", value: $challengeAmount, format: .number)
                             .keyboardType(.decimalPad)
                     }
                     
@@ -59,7 +59,7 @@ struct PinTaskInputForm: View {
         pinTask.id = UUID()
         pinTask.latitude = self.coordinate.latitude
         pinTask.longitude = self.coordinate.longitude
-        pinTask.wager = self.wager
+        pinTask.challengeAmount = self.challengeAmount
         pinTask.deadline = self.deadline
         pinTask.title = self.title
         

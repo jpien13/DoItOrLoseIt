@@ -45,6 +45,10 @@ struct TaskListView: View {
 }
 
 #Preview {
+    let dataManager = DataManager()
     TaskListView()
-        .environmentObject(PinTaskViewModel())
+        .environmentObject(dataManager)
+        .environmentObject(LocationManager())
+        .environment(\.managedObjectContext, dataManager.container.viewContext)
+       
 }

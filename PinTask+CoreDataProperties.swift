@@ -20,7 +20,7 @@ extension PinTask {
     @NSManaged public var id: UUID?
     @NSManaged public var longitude: Double
     @NSManaged public var latitude: Double
-    @NSManaged public var wager: Double
+    @NSManaged public var challengeAmount: Double
 
 }
 

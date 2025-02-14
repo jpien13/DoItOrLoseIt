@@ -60,26 +60,27 @@ final class LocationManager: NSObject, ObservableObject {
         }
     }
     
+    /*
+     Takes an array of PinTasks and sets up geofencing regions for each one.
+     When a user crosses one of these fences, iOS will notify the app.
+     The first part clears any existing monitored regions to avoid duplicates,
+     then creates a new 50-meter radius circular region for each PinTask.
+     */
     func startMonitoringPinTasks(_ pinTasks: [PinTask]) {
         guard let deviceLocationManager = deviceLocationManager else { return }
         
-        // Remove all existing monitored regions
         for region in deviceLocationManager.monitoredRegions {
             deviceLocationManager.stopMonitoring(for: region)
         }
         
         for pinTask in pinTasks {
-            // Create a circular region with 50-meter radius
             let center = CLLocationCoordinate2D(latitude: pinTask.latitude, longitude: pinTask.longitude)
-            
-            // Use pinTask.id as identifier for the region
             guard let id = pinTask.id?.uuidString else { continue }
             
             let region = CLCircularRegion(center: center, radius: 50, identifier: id)
             region.notifyOnEntry = true
             region.notifyOnExit = false
             
-            // Start monitoring the region
             if CLLocationManager.isMonitoringAvailable(for: CLCircularRegion.self) {
                 deviceLocationManager.startMonitoring(for: region)
                 monitoredRegions.insert(region)

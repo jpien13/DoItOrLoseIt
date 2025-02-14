@@ -24,7 +24,7 @@ class PinTaskViewModel: NSObject, ObservableObject {
     func addPinTask(coordinate: CLLocationCoordinate2D) {
         let newCoordinate = PinTaskDummy(longitude: coordinate.longitude,
                                     latitude: coordinate.latitude,
-                                    wager: 12.34,
+                                         challengeAmount: 12.34,
                                     deadline: "This is a test")
         pinTasks.append(newCoordinate)
     }

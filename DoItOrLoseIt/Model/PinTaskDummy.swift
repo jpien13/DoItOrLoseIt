@@ -17,14 +17,14 @@ struct PinTaskDummy: Codable, Equatable, Hashable, Identifiable {
     let id: UUID
     let longitude: Double
     let latitude: Double
-    let wager: Double
+    let challengeAmount: Double
     let deadline: String
     
-    init(longitude: Double, latitude: Double, wager: Double, deadline: String) {
+    init(longitude: Double, latitude: Double, challengeAmount: Double, deadline: String) {
         self.id = UUID()
         self.longitude = longitude
         self.latitude = latitude
-        self.wager = wager
+        self.challengeAmount = challengeAmount
         self.deadline = deadline
     }
     

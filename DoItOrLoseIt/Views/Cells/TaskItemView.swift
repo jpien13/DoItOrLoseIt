@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct TaskItemView: View {
     @Environment(\.managedObjectContext) var viewContext
     @EnvironmentObject var dataManager: DataManager
     
     let pinTask: PinTask
+    @State private var address: String = "Loading address..."
     
     var body: some View {
        
@@ -23,9 +25,9 @@ struct TaskItemView: View {
             }
             .padding(.horizontal)
             HStack{
-                (Text(String(pinTask.latitude)) + Text(", ") + Text(String(pinTask.longitude)))
+                Text(address)
                 Spacer()
-                Text("$ ") + Text(String(format: "%.2f", pinTask.wager))
+                Text("$ ") + Text(String(format: "%.2f", pinTask.challengeAmount))
             }
             .padding(.horizontal)
             HStack {
@@ -44,13 +46,52 @@ struct TaskItemView: View {
         .cornerRadius(10)
         .padding(.horizontal)
         .shadow(radius: 3)
+        .onAppear {
+            reverseGeocoding(latitude: pinTask.latitude, longitude: pinTask.longitude)
+        }
     
     }
     
     private func formatDate(_ date: Date) -> String {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            formatter.timeStyle = .short
-            return formatter.string(from: date)
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
+    }
+    
+    private func reverseGeocoding(latitude: CLLocationDegrees, longitude: CLLocationDegrees) {
+        let geocoder = CLGeocoder()
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        
+        geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
+            DispatchQueue.main.async {
+                if let error = error {
+                    self.address = "Address unavailable"
+                    print("Geocoding error: \(error.localizedDescription)")
+                    return
+                }
+                
+                if let placemarks = placemarks, let placemark = placemarks.first {
+                    
+                    if let areasOfInterest = placemark.areasOfInterest, !areasOfInterest.isEmpty {
+                        self.address = areasOfInterest[0]
+                        return
+                    }
+                    if let name = placemark.name {
+                        self.address = name
+                        return
+                    }
+                    let addressComponents = [
+                        placemark.locality,            // City
+                        placemark.administrativeArea   // State
+                    ].compactMap { $0 }
+                    
+                    self.address = addressComponents.joined(separator: ", ")
+                } else {
+                    self.address = "Address not found"
+                }
+            }
         }
+    }
+    
 }

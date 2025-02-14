@@ -95,6 +95,10 @@ class DataManager: NSObject, ObservableObject {
 }
 
 extension DataManager {
+    /*
+     This function is called when a user enters a monitored region.
+     It finds the corresponding PinTask in Core Data using its UUID and deletes it.
+     */
     func deletePinTask(withId id: UUID?) {
         guard let id = id else { return }
         
