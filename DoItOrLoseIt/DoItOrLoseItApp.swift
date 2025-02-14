@@ -25,7 +25,7 @@ struct DoItOrLoseItApp: App {
 }
 
 
-// TODO: Add deadline
+// TODO: Add deadline to run in background (import BackgroundTasks)
 // TODO: Add wager subtract and balance
 // TODO: Watch ad to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.
 

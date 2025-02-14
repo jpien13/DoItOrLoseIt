@@ -38,9 +38,22 @@
 		A7CB2C1D2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PinTask+CoreDataProperties.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A7B8870D2D5FC51300A4BE08 /* Exceptions for "DoItOrLoseIt" folder in "DoItOrLoseIt" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A79B33302D42C9DF00E376E2 /* DoItOrLoseIt */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A79B33332D42C9DF00E376E2 /* DoItOrLoseIt */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A7B8870D2D5FC51300A4BE08 /* Exceptions for "DoItOrLoseIt" folder in "DoItOrLoseIt" target */,
+			);
 			path = DoItOrLoseIt;
 			sourceTree = "<group>";
 		};
@@ -414,7 +427,9 @@
 				DEVELOPMENT_TEAM = HB266R4Z6R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "App needs location to verify completion of tasks";
+				INFOPLIST_FILE = DoItOrLoseIt/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "App needs location to verify completion of tasks. Even when app is closed.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location Info Needed to verify task completion";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -444,7 +459,9 @@
 				DEVELOPMENT_TEAM = HB266R4Z6R;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "App needs location to verify completion of tasks";
+				INFOPLIST_FILE = DoItOrLoseIt/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "App needs location to verify completion of tasks. Even when app is closed.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Location Info Needed to verify task completion";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
