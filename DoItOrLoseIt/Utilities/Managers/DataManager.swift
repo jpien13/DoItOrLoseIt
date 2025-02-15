@@ -119,4 +119,66 @@ extension DataManager {
             )
         }
     }
+    
+    func checkForFailedDeadlines() {
+        let fetchRequest: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+        
+        fetchRequest.sortDescriptors = [
+            NSSortDescriptor(key: "deadline", ascending: true)
+        ]
+        
+        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+            // First condition: task must be active
+            NSPredicate(format: "status == %@", TaskStatus.active.rawValue),
+            // Second condition: deadline must be in the past
+            NSPredicate(format: "deadline < %@", Date() as NSDate)
+        ])
+        
+        container.viewContext.performAndWait {
+            do {
+                let failedTasks = try container.viewContext.fetch(fetchRequest)
+                guard !failedTasks.isEmpty else { return }
+                var updatedTasks: [PinTask] = []
+                for task in failedTasks {
+                    task.taskStatus = .failed
+                    updatedTasks.append(task)
+                }
+                if container.viewContext.hasChanges {
+                    try container.viewContext.save()
+                    
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(
+                            name: .taskFailedNotification,
+                            object: nil,
+                            userInfo: ["failedTasks": updatedTasks]
+                        )
+                    }
+                }
+                
+            } catch{
+                print("Error while checking for failed deadlines: \(error)")
+                container.viewContext.rollback()
+            }
+        }
+    }
+    
+    private func scheduleBackgroundTask() {
+        
+    }
+    
+    /*
+     withTimeInterval: seconds
+     */
+    func scheduleDeadlineCheck(){
+        // check up front in case app was closed
+        checkForFailedDeadlines()
+        scheduleBackgroundTask()
+        Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+            self?.checkForFailedDeadlines()
+        }
+    }
+}
+
+extension Notification.Name {
+    static let taskFailedNotification = Notification.Name("taskFailedNotification")
 }

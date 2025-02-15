@@ -25,6 +25,8 @@ struct DoItOrLoseItApp: App {
 }
 
 
+// TODO: Deadlines
+// TODO: Keep track of failed tasks and when next open app, show honor price button
 // TODO: Add wager subtract and balance
 // TODO: Honor my price button
 // TODO: Watch ad to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.

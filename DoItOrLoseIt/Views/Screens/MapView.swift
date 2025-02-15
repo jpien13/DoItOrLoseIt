@@ -15,7 +15,6 @@ import MapKit
 
 struct MapView: View {
     
-    //@EnvironmentObject var viewModel: PinTaskViewModel
     @Environment(\.managedObjectContext) var viewContext
     @EnvironmentObject private var locationManager: LocationManager
     @EnvironmentObject var dataManager: DataManager
