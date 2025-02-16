@@ -192,6 +192,21 @@ extension DataManager {
                     task.taskStatus = .failed
                     if let id = task.id {
                         updatedTasksDict[id] = task
+                        let content = UNMutableNotificationContent()
+                        content.title = "Task Failed"
+                        content.body = "Your task \"\(task.title ?? "untitled\"")\" has passed its deadline."
+                        content.sound = .default
+                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+                        let request = UNNotificationRequest(
+                            identifier: id.uuidString,
+                            content: content,
+                            trigger: trigger
+                        )
+                        UNUserNotificationCenter.current().add(request) { error in
+                                if let error = error {
+                                print("Error adding notification: \(error)")
+                            }
+                        }
                     }
                     print("Marked new task as failed: \(task.title ?? "untitled")")
                 }
