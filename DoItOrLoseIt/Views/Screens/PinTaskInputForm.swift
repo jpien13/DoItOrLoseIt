@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import CoreData
 
 struct PinTaskInputForm: View {
     
@@ -62,12 +63,27 @@ struct PinTaskInputForm: View {
         pinTask.challengeAmount = self.challengeAmount
         pinTask.deadline = self.deadline
         pinTask.title = self.title
+        pinTask.status = TaskStatus.active.rawValue
+        
+        print("Saving new PinTask:")
+        print("Title: \(self.title)")
+        print("Deadline: \(self.deadline)")
+        print("Status: \(TaskStatus.active.rawValue)")
         
         do {
             try self.viewContext.save()
             print("PinTask Saved Successfully")
+            
+            // Verify the save by fetching
+            let fetchRequest: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+            let tasks = try self.viewContext.fetch(fetchRequest)
+            print("Total tasks in Core Data: \(tasks.count)")
+            print("All tasks:")
+            for task in tasks {
+                print("- Title: \(task.title ?? "untitled"), Deadline: \(task.deadline?.description ?? "no deadline"), Status: \(task.status)")
+            }
         } catch {
-            print("Whoops \\(error.localizedDescription)")
+            print("Error saving PinTask: \(error.localizedDescription)")
         }
             
     }

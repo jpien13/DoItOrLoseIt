@@ -4,11 +4,17 @@
 <dict>
 	<key></key>
 	<string></string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>Jason.DoItOrLoseIt.deadlinecheck</string>
+	</array>
 	<key>NSLocationRequireExplicitServiceSession</key>
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
+		<string>processing</string>
+		<string>fetch</string>
 	</array>
 </dict>
 </plist>

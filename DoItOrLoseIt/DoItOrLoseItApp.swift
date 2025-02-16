@@ -7,12 +7,20 @@
 
 import SwiftUI
 import SwiftData
+import BackgroundTasks
 
 @main
 struct DoItOrLoseItApp: App {
-    // MARK: Core data
     @StateObject private var dataManager: DataManager = DataManager()
     @StateObject private var locationManager = LocationManager()
+    private let backgroundTaskManager: BackgroundTaskManager
+    
+    init() {
+        let dataManager = DataManager()
+        backgroundTaskManager = BackgroundTaskManager(dataManager: dataManager)
+        _dataManager = StateObject(wrappedValue: dataManager)
+
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -30,7 +38,7 @@ struct DoItOrLoseItApp: App {
 // TODO: Add wager subtract and balance
 // TODO: Honor my price button
 // TODO: Watch ad to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.
-
+// TODO: Fix the bigs seen in console when entering task title
 
 /*
 Honor my price is probably best (if you complete you get extra rewards)

@@ -11,6 +11,7 @@ import CoreData
 import Foundation
 import MapKit
 import SwiftUI
+import BackgroundTasks
 // Main data manager to handle the PinTask items
 class DataManager: NSObject, ObservableObject {
     
@@ -25,6 +26,7 @@ class DataManager: NSObject, ObservableObject {
     override init() {
         super.init()
         container.loadPersistentStores { _, _ in }
+        migrateExistingTasks()
     }
     
     func filterPinTasksInBoundingBox(
@@ -92,6 +94,33 @@ class DataManager: NSObject, ObservableObject {
             )
         }
     }
+    
+    func migrateExistingTasks() {
+        print("Starting migration of existing tasks")
+        let fetchRequest: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+        
+        fetchRequest.predicate = NSPredicate(format: "status == nil OR status == ''")
+        
+        container.viewContext.performAndWait {
+            do {
+                let tasksToMigrate = try container.viewContext.fetch(fetchRequest)
+                print("Found \(tasksToMigrate.count) tasks to migrate")
+                
+                for task in tasksToMigrate {
+                    task.status = TaskStatus.active.rawValue
+                    print("Migrated task: \(task.title ?? "untitled")")
+                }
+                
+                if container.viewContext.hasChanges {
+                    try container.viewContext.save()
+                    print("Migration completed successfully")
+                }
+            } catch {
+                print("Migration error: \(error)")
+                container.viewContext.rollback()
+            }
+        }
+    }
 }
 
 extension DataManager {
@@ -121,31 +150,75 @@ extension DataManager {
     }
     
     func checkForFailedDeadlines() {
+        print("\n--- Checking for failed deadlines ---")
         let fetchRequest: NSFetchRequest<PinTask> = PinTask.fetchRequest()
         
-        fetchRequest.sortDescriptors = [
-            NSSortDescriptor(key: "deadline", ascending: true)
-        ]
+        // First get all tasks for logging
+        do {
+            let allTasks = try container.viewContext.fetch(fetchRequest)
+            print("Total tasks in database: \(allTasks.count)")
+            print("All tasks:")
+            for task in allTasks {
+                print("- Title: \(task.title ?? "untitled"), Deadline: \(task.deadline?.description ?? "no deadline"), Status: \(task.status)")
+            }
+        } catch {
+            print("Error fetching all tasks: \(error)")
+        }
         
-        fetchRequest.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
-            // First condition: task must be active
-            NSPredicate(format: "status == %@", TaskStatus.active.rawValue),
-            // Second condition: deadline must be in the past
-            NSPredicate(format: "deadline < %@", Date() as NSDate)
-        ])
+        let now = Date()
+        print("Current date: \(now)")
         
         container.viewContext.performAndWait {
             do {
-                let failedTasks = try container.viewContext.fetch(fetchRequest)
-                guard !failedTasks.isEmpty else { return }
-                var updatedTasks: [PinTask] = []
-                for task in failedTasks {
-                    task.taskStatus = .failed
-                    updatedTasks.append(task)
-                }
-                if container.viewContext.hasChanges {
-                    try container.viewContext.save()
+                var updatedTasksDict: [UUID: PinTask] = [:]  // Use dictionary instead of Set
+                
+                // First check for newly failed tasks
+                let activeTasksFetch: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+                activeTasksFetch.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+                    NSPredicate(format: "status == %@", TaskStatus.active.rawValue),
+                    NSPredicate(format: "deadline != nil AND deadline < %@", now as NSDate)
+                ])
+                
+                let newlyFailedTasks = try container.viewContext.fetch(activeTasksFetch)
+                print("Found \(newlyFailedTasks.count) newly failed tasks")
+                
+                for task in newlyFailedTasks {
+                    print("New failed task details:")
+                    print("- Title: \(task.title ?? "untitled")")
+                    print("- Deadline: \(task.deadline?.description ?? "no deadline")")
+                    print("- Status: \(task.status)")
+                    print("- Is deadline past? \(task.deadline?.compare(now) == .orderedAscending ? "Yes" : "No")")
                     
+                    task.taskStatus = .failed
+                    if let id = task.id {
+                        updatedTasksDict[id] = task
+                    }
+                    print("Marked new task as failed: \(task.title ?? "untitled")")
+                }
+                
+                // Now fetch all existing failed tasks
+                let failedTasksFetch: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+                failedTasksFetch.predicate = NSPredicate(format: "status == %@", TaskStatus.failed.rawValue)
+                
+                let existingFailedTasks = try container.viewContext.fetch(failedTasksFetch)
+                print("Found \(existingFailedTasks.count) existing failed tasks")
+                
+                // Add existing failed tasks to dictionary
+                for task in existingFailedTasks {
+                    if let id = task.id {
+                        updatedTasksDict[id] = task
+                    }
+                }
+                
+                let updatedTasks = Array(updatedTasksDict.values)
+                
+                if !updatedTasks.isEmpty {
+                    if container.viewContext.hasChanges {
+                        try container.viewContext.save()
+                        print("Saved changes to Core Data")
+                    }
+                    
+                    print("Posting notification for \(updatedTasks.count) total failed tasks")
                     DispatchQueue.main.async {
                         NotificationCenter.default.post(
                             name: .taskFailedNotification,
@@ -153,27 +226,38 @@ extension DataManager {
                             userInfo: ["failedTasks": updatedTasks]
                         )
                     }
+                } else {
+                    print("No failed tasks to process")
                 }
                 
-            } catch{
+            } catch {
                 print("Error while checking for failed deadlines: \(error)")
                 container.viewContext.rollback()
             }
         }
     }
     
-    private func scheduleBackgroundTask() {
+    public func scheduleBackgroundTask() {
+        let request = BGProcessingTaskRequest(identifier: "Jason.DoItOrLoseIt.deadlinecheck")
+        request.requiresNetworkConnectivity = false
+        request.requiresExternalPower = false
         
+        do {
+            try BGTaskScheduler.shared.submit(request)
+        } catch {
+            print("Could not schedule background task: \(error)")
+        }
     }
     
     /*
      withTimeInterval: seconds
      */
-    func scheduleDeadlineCheck(){
-        // check up front in case app was closed
+    func scheduleDeadlineCheck() {
+        print("Scheduling deadline check")
         checkForFailedDeadlines()
         scheduleBackgroundTask()
-        Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+        Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+            print("Timer fired - checking deadlines")
             self?.checkForFailedDeadlines()
         }
     }
