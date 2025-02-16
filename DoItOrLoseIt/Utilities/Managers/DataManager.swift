@@ -19,6 +19,8 @@ class DataManager: NSObject, ObservableObject {
     @Published var todos: [PinTask] = [PinTask]()
     @Published var alertItem: AlertItem?
     
+    private var foregroundTimer: Timer?
+    
     // Add the Core Data container with the model name
     let container: NSPersistentContainer = NSPersistentContainer(name: "PinTaskList")
     
@@ -121,6 +123,12 @@ class DataManager: NSObject, ObservableObject {
             }
         }
     }
+    
+    // Clean up when DataManager is deallocated
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        foregroundTimer?.invalidate()
+    }
 }
 
 extension DataManager {
@@ -203,7 +211,7 @@ extension DataManager {
                             trigger: trigger
                         )
                         UNUserNotificationCenter.current().add(request) { error in
-                                if let error = error {
+                            if let error = error {
                                 print("Error adding notification: \(error)")
                             }
                         }
@@ -256,6 +264,7 @@ extension DataManager {
         let request = BGProcessingTaskRequest(identifier: "Jason.DoItOrLoseIt.deadlinecheck")
         request.requiresNetworkConnectivity = false
         request.requiresExternalPower = false
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 300)
         
         do {
             try BGTaskScheduler.shared.submit(request)
@@ -265,17 +274,54 @@ extension DataManager {
     }
     
     /*
-     withTimeInterval: seconds
+     Invalidate existing timer if any
+     Create new timer that fires every 5 seconds
      */
+    private func startForegroundTimer() {
+        foregroundTimer?.invalidate()
+        foregroundTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
+            print("Foreground timer fired - checking deadlines")
+            self?.checkForFailedDeadlines()
+        }
+    }
+    
+    /*
+     Stop the frequent foreground timer
+     Schedule background task (already set to 5 minutes)
+     */
+    @objc private func appMovedToBackground() {
+        print("App moved to background")
+        foregroundTimer?.invalidate()
+        foregroundTimer = nil
+        scheduleBackgroundTask()
+    }
+    
+    // Restart the frequent foreground timer
+    @objc private func appMovedToForeground() {
+        print("App moved to foreground")
+        startForegroundTimer()
+    }
+    
     func scheduleDeadlineCheck() {
         print("Scheduling deadline check")
         checkForFailedDeadlines()
         scheduleBackgroundTask()
-        Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
-            print("Timer fired - checking deadlines")
-            self?.checkForFailedDeadlines()
-        }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appMovedToBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appMovedToForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+        startForegroundTimer()
     }
+    
 }
 
 extension Notification.Name {
