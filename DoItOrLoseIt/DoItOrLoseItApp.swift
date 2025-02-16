@@ -19,7 +19,10 @@ struct DoItOrLoseItApp: App {
         let dataManager = DataManager()
         backgroundTaskManager = BackgroundTaskManager(dataManager: dataManager)
         _dataManager = StateObject(wrappedValue: dataManager)
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: [.alert, .sound, .badge]
+        ) { granted, error in
             if granted {
                 print("Notifications Permission Granted")
             } else if let error = error {

@@ -204,11 +204,12 @@ extension DataManager {
                         content.title = "Task Failed"
                         content.body = "Your task \"\(task.title ?? "untitled\"")\" has passed its deadline."
                         content.sound = .default
-                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+                        content.threadIdentifier = "failed-tasks"
+                        content.interruptionLevel = .timeSensitive
                         let request = UNNotificationRequest(
                             identifier: id.uuidString,
                             content: content,
-                            trigger: trigger
+                            trigger: nil
                         )
                         UNUserNotificationCenter.current().add(request) { error in
                             if let error = error {
@@ -264,10 +265,12 @@ extension DataManager {
         let request = BGProcessingTaskRequest(identifier: "Jason.DoItOrLoseIt.deadlinecheck")
         request.requiresNetworkConnectivity = false
         request.requiresExternalPower = false
-        request.earliestBeginDate = Date(timeIntervalSinceNow: 300)
+        
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 16 * 60)
         
         do {
             try BGTaskScheduler.shared.submit(request)
+            print("Successfully scheduled next background task")
         } catch {
             print("Could not schedule background task: \(error)")
         }
