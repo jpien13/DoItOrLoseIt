@@ -35,8 +35,6 @@ struct MapView: View {
     @State private var isOnUserLocation = true
     @State private var showingAddSheet = false
     @State private var selectedCoordinate: CLLocationCoordinate2D?
-    @State private var showingFailedTaskAlert = false
-    @State private var failedTasks: [PinTask] = []
     
     @StateObject var sheetManager = SheetManager()
     
@@ -110,30 +108,6 @@ struct MapView: View {
                     })
             }
         })
-        .onAppear {
-            locationManager.checkIfLocationServicesIsEnable()
-            dataManager.scheduleDeadlineCheck()
-            
-            print("Setting up notification observer")
-            NotificationCenter.default.addObserver(
-                forName: .taskFailedNotification,
-                object: nil,
-                queue: .main
-            ) { notification in
-                print("Received task failed notification")
-                if let tasks = notification.userInfo?["failedTasks"] as? [PinTask] {
-                    print("Found \(tasks.count) failed tasks")
-                    failedTasks = tasks
-                    showingFailedTaskAlert = !tasks.isEmpty
-                }
-            }
-        }
-        .sheet(isPresented: $showingFailedTaskAlert) {
-            FailTaskView(
-                failedTasks: $failedTasks,
-                isPresented: $showingFailedTaskAlert
-            )
-        }
         .onChange(of: locationManager.isLocationReady) { oldValue, newValue in
             if newValue && isOnUserLocation{
                 cameraPosition = .userLocation(fallback: .automatic)
