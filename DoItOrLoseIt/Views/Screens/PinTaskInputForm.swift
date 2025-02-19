@@ -22,6 +22,15 @@ struct PinTaskInputForm: View {
     @State private var challengeAmount: Double = 0.0
     @State private var deadline: Date = Date()
     @State private var title: String = "My Task"
+    @State private var showInvalidDateAlert: Bool = false
+    
+    private var minimumDate: Date {
+        Date().addingTimeInterval(120)
+    }
+    
+    private func isValidDeadline() -> Bool {
+        return deadline >= minimumDate
+    }
     
     var body: some View {
         NavigationView {
@@ -38,7 +47,10 @@ struct PinTaskInputForm: View {
                             .keyboardType(.decimalPad)
                     }
                     
-                    DatePicker("Deadline", selection: $deadline, displayedComponents: [.date, .hourAndMinute])
+                    DatePicker("Deadline",
+                               selection: $deadline,
+                               in: minimumDate...,
+                               displayedComponents: [.date, .hourAndMinute])
                 }
                 
             }
@@ -48,10 +60,21 @@ struct PinTaskInputForm: View {
                     dismiss()
                 },
                 trailing: Button("Save") {
-                    savePinTask()
-                    dismiss()
+                    if isValidDeadline() {
+                        savePinTask()
+                        dismiss()
+                    } else {
+                        showInvalidDateAlert = true
+                    }
+                    
                 }
             )
+            .alert("Invalid Deadline",
+                   isPresented: $showInvalidDateAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Please set a deadline that is at least a few minutes in the future.")
+            }
         }
     }
     

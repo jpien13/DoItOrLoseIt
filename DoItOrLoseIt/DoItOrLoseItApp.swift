@@ -43,7 +43,6 @@ struct DoItOrLoseItApp: App {
 
 
 // TODO: Add wager subtract and balance
-// TODO: Fix bug where if you add task ontop of yourself and the time is now, then you fail. (can only set deadline more than 1 minutes ahead)
 // TODO: Honor my price button
 // TODO: Watch ad to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.
 // TODO: Fix the bigs seen in console when entering task title
