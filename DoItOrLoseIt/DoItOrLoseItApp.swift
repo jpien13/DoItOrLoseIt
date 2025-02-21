@@ -12,21 +12,25 @@ import BackgroundTasks
 @main
 struct DoItOrLoseItApp: App {
     @StateObject private var dataManager: DataManager = DataManager()
-    @StateObject private var locationManager = LocationManager()
+    @StateObject private var locationManager: LocationManager
     private let backgroundTaskManager: BackgroundTaskManager
     
     init() {
+        print("📱 App initializing")
         let dataManager = DataManager()
-        backgroundTaskManager = BackgroundTaskManager(dataManager: dataManager)
+        let locationManager = LocationManager(dataManager: dataManager)
         _dataManager = StateObject(wrappedValue: dataManager)
+        _locationManager = StateObject(wrappedValue: locationManager)
+        backgroundTaskManager = BackgroundTaskManager(dataManager: dataManager)
 
+        print("🔔 Setting up notifications")
         UNUserNotificationCenter.current().requestAuthorization(
             options: [.alert, .sound, .badge]
         ) { granted, error in
             if granted {
-                print("Notifications Permission Granted")
+                print("✅ Notifications Permission Granted")
             } else if let error = error {
-                print("Notifications Permission Denied: \(error)")
+                print("❌ Notifications Permission Denied: \(error)")
             }
         }
     }
@@ -43,9 +47,7 @@ struct DoItOrLoseItApp: App {
 
 
 // TODO: Add wager subtract and balance
-// TODO: Honor my price button
 // TODO: Watch ad to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.
-// TODO: Fix the bigs seen in console when entering task title
 // TODO: Push notifications using a server using firebase
 
 /*

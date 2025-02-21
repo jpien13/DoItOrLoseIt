@@ -31,6 +31,14 @@ final class LocationManager: NSObject, ObservableObject {
     
     private var deviceLocationManager: CLLocationManager?
     private var monitoredRegions: Set<CLCircularRegion> = []
+    private weak var dataManager: DataManager?
+    
+    init(dataManager: DataManager) {
+        self.dataManager = dataManager
+        super.init()
+        print("🚀 LocationManager initialized")
+        checkIfLocationServicesIsEnable()
+    }
 
     /**
      * Verifies if location services are enabled on the device and sets up the location manager.
@@ -102,20 +110,19 @@ final class LocationManager: NSObject, ObservableObject {
      */
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
+        print("📍 Location update received: \(location.coordinate)")
         userLocation = CoordinateWrapper(coordinate: location.coordinate)
         isLocationReady = true
     }
     
     func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        guard let circularRegion = region as? CLCircularRegion else { return }
-        
-        // Handle region entry - delete the corresponding PinTask
+        guard let circularRegion = region as? CLCircularRegion,
+            let dataManager = dataManager else { return }
+    
         DispatchQueue.main.async {
-            if let viewContext = self.deviceLocationManager?.delegate as? DataManager {
-                viewContext.deletePinTask(withId: UUID(uuidString: region.identifier))
-            }
+            dataManager.deletePinTask(withId: UUID(uuidString: region.identifier))
         }
-        
+
         // Stop monitoring this region since the task is complete
         manager.stopMonitoring(for: region)
         monitoredRegions.remove(circularRegion)
@@ -132,23 +139,31 @@ final class LocationManager: NSObject, ObservableObject {
     * 5. Begins location updates when authorized
     */
     private func checkLocationAuth() {
+        guard let deviceLocationManager = deviceLocationManager else {
+            print("❌ Device location manager is nil")
+            return
+        }
         
-        guard let deviceLocationManager = deviceLocationManager else {return}
+        print("📱 Checking location auth status: \(deviceLocationManager.authorizationStatus.rawValue)")
         
         switch deviceLocationManager.authorizationStatus {
         case .notDetermined:
+            print("📍 Requesting authorization")
             deviceLocationManager.requestAlwaysAuthorization()
         case .restricted:
+            print("❌ Location restricted")
             alertItem = AlertContext.locationRestricted
         case .denied:
+            print("❌ Location denied")
             alertItem = AlertContext.locationDenied
         case .authorizedAlways, .authorizedWhenInUse:
+            print("✅ Location authorized")
             deviceLocationManager.startUpdatingLocation()
             deviceLocationManager.allowsBackgroundLocationUpdates = true
             deviceLocationManager.pausesLocationUpdatesAutomatically = false
         @unknown default:
+            print("❓ Unknown authorization status")
             break
-            
         }
     }
 }

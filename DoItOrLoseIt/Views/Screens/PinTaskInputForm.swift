@@ -88,6 +88,9 @@ struct PinTaskInputForm: View {
         pinTask.title = self.title
         pinTask.status = TaskStatus.active.rawValue
         
+        print("📍 Saving new PinTask coordinates:")
+        print("- Latitude: \(self.coordinate.latitude)")
+        print("- Longitude: \(self.coordinate.longitude)")
         print("Saving new PinTask:")
         print("Title: \(self.title)")
         print("Deadline: \(self.deadline)")

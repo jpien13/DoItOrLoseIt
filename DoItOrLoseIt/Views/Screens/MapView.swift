@@ -114,8 +114,10 @@ struct MapView: View {
             }
         }
         .onChange(of: locationManager.userLocation) { oldValue, newValue in
+            print("🌍 User location changed")
             if let locationWrapper = newValue,
                let boundingBox = locationManager.calculateBoundingBox() {
+                print("📦 Bounding box calculated: SW(\(boundingBox.southWest)), NE(\(boundingBox.northEast))")
                 dataManager.removePinTasksWithin50Meters(
                     userLocation: locationWrapper.coordinate,
                     boundingbox: boundingBox,
@@ -145,6 +147,6 @@ struct MapView: View {
     let dataManager = DataManager()
     MapView()
         .environmentObject(dataManager)
-        .environmentObject(LocationManager())
+        .environmentObject(LocationManager(dataManager: dataManager))
         .environment(\.managedObjectContext, dataManager.container.viewContext)
 }

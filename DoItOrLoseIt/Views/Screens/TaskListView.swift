@@ -47,7 +47,7 @@ struct TaskListView: View {
     let dataManager = DataManager()
     TaskListView()
         .environmentObject(dataManager)
-        .environmentObject(LocationManager())
+        .environmentObject(LocationManager(dataManager: dataManager))
         .environment(\.managedObjectContext, dataManager.container.viewContext)
        
 }

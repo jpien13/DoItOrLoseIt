@@ -67,7 +67,9 @@ class DataManager: NSObject, ObservableObject {
         boundingbox: (southWest: CLLocationCoordinate2D, northEast: CLLocationCoordinate2D),
         context: NSManagedObjectContext
     ) {
+        print("Checking tasks within 50m of user location: \(userLocation)")
         let filteredTasks = filterPinTasksInBoundingBox(boundingBox: boundingbox, context: context)
+        print("Found \(filteredTasks.count) tasks in bounding box")
         
         for pinTask in filteredTasks {
             let taskLocation = CLLocationCoordinate2D(
@@ -80,15 +82,27 @@ class DataManager: NSObject, ObservableObject {
                 to: taskLocation
             )
             
+            print("Task '\(pinTask.title ?? "untitled")' details:")
+            print("- Task location: \(taskLocation)")
+            print("- Distance from user: \(distance) meters")
+            print("- Within range? \(distance <= 50 ? "Yes" : "No")")
+            
             if distance <= 50 {
+                print("🗑️ Removing task within range: \(pinTask.title ?? "untitled")")
                 context.delete(pinTask)
             }
         }
         
         // Save changes after all deletions
         do {
-            try context.save()
+            if context.hasChanges {
+                try context.save()
+                print("✅ Changes saved - tasks removed")
+            } else {
+                print("ℹ️ No changes to save")
+            }
         } catch {
+            print("❌ Error saving context: \(error)")
             alertItem = AlertItem(
                 title: Text("Error"),
                 message: Text("Unable to delete completed tasks."),

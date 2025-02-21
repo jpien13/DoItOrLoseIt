@@ -68,7 +68,7 @@ struct HomeTabView: View {
 #Preview {
     let dataManager = DataManager()
     HomeTabView()
-        .environmentObject(LocationManager())
+        .environmentObject(LocationManager(dataManager: dataManager))
         .environmentObject(DataManager())
         .environment(\.managedObjectContext, dataManager.container.viewContext)
 }
