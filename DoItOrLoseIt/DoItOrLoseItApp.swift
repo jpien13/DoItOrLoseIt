@@ -45,10 +45,10 @@ struct DoItOrLoseItApp: App {
     }
 }
 
-
+// TODO: Push notifications using a server using firebase
 // TODO: Add wager subtract and balance
 // TODO: Watch ad to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.
-// TODO: Push notifications using a server using firebase
+// TODO: Maybe make it like flora or finch with virtual world
 
 /*
 Honor my price is probably best (if you complete you get extra rewards)
