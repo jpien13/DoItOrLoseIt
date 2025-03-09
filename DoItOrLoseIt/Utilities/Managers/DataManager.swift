@@ -12,6 +12,7 @@ import Foundation
 import MapKit
 import SwiftUI
 import BackgroundTasks
+import OSLog
 // Main data manager to handle the PinTask items
 class DataManager: NSObject, ObservableObject {
     
@@ -172,29 +173,12 @@ extension DataManager {
     }
     
     func checkForFailedDeadlines() {
-        print("\n--- Checking for failed deadlines ---")
-        let fetchRequest: NSFetchRequest<PinTask> = PinTask.fetchRequest()
         
-        // First get all tasks for logging
-        do {
-            let allTasks = try container.viewContext.fetch(fetchRequest)
-            print("Total tasks in database: \(allTasks.count)")
-            print("All tasks:")
-            for task in allTasks {
-                print("- Title: \(task.title ?? "untitled"), Deadline: \(task.deadline?.description ?? "no deadline"), Status: \(task.status)")
-            }
-        } catch {
-            print("Error fetching all tasks: \(error)")
-        }
-        
+        os_log("Checking for failed deadlines", log: .data, type: .debug)
         let now = Date()
-        print("Current date: \(now)")
-        
         container.viewContext.performAndWait {
             do {
-                var updatedTasksDict: [UUID: PinTask] = [:]  // Use dictionary instead of Set
-                
-                // First check for newly failed tasks
+                // First check for all active tasks that passed their deadline
                 let activeTasksFetch: NSFetchRequest<PinTask> = PinTask.fetchRequest()
                 activeTasksFetch.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
                     NSPredicate(format: "status == %@", TaskStatus.active.rawValue),
@@ -202,74 +186,71 @@ extension DataManager {
                 ])
                 
                 let newlyFailedTasks = try container.viewContext.fetch(activeTasksFetch)
-                print("Found \(newlyFailedTasks.count) newly failed tasks")
+                os_log("Found %d newly failed tasks", log: .data, type: .debug, newlyFailedTasks.count)
+                
+                var updatedTasksDict = [UUID: PinTask]()
                 
                 for task in newlyFailedTasks {
-                    print("New failed task details:")
-                    print("- Title: \(task.title ?? "untitled")")
-                    print("- Deadline: \(task.deadline?.description ?? "no deadline")")
-                    print("- Status: \(task.status)")
-                    print("- Is deadline past? \(task.deadline?.compare(now) == .orderedAscending ? "Yes" : "No")")
-                    
                     task.taskStatus = .failed
                     if let id = task.id {
                         updatedTasksDict[id] = task
+                        
                         let content = UNMutableNotificationContent()
                         content.title = "Task Failed"
                         content.body = "Your task \"\(task.title ?? "untitled\"")\" has passed its deadline."
                         content.sound = .default
                         content.threadIdentifier = "failed-tasks"
                         content.interruptionLevel = .timeSensitive
+                        
                         let request = UNNotificationRequest(
                             identifier: id.uuidString,
                             content: content,
                             trigger: nil
                         )
+                        
                         UNUserNotificationCenter.current().add(request) { error in
                             if let error = error {
-                                print("Error adding notification: \(error)")
+                                os_log("Error adding notification: %{public}@", log: .data, type: .error, error.localizedDescription)
                             }
                         }
                     }
-                    print("Marked new task as failed: \(task.title ?? "untitled")")
                 }
                 
-                // Now fetch all existing failed tasks
-                let failedTasksFetch: NSFetchRequest<PinTask> = PinTask.fetchRequest()
-                failedTasksFetch.predicate = NSPredicate(format: "status == %@", TaskStatus.failed.rawValue)
-                
-                let existingFailedTasks = try container.viewContext.fetch(failedTasksFetch)
-                print("Found \(existingFailedTasks.count) existing failed tasks")
-                
-                // Add existing failed tasks to dictionary
-                for task in existingFailedTasks {
-                    if let id = task.id {
-                        updatedTasksDict[id] = task
+                // Get already failed tasks
+                if !newlyFailedTasks.isEmpty {
+                    let failedTasksFetch: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+                    failedTasksFetch.predicate = NSPredicate(format: "status == %@", TaskStatus.failed.rawValue)
+                    
+                    let existingFailedTasks = try container.viewContext.fetch(failedTasksFetch)
+                    os_log("Found %d existing failed tasks", log: .data, type: .debug, existingFailedTasks.count)
+                    
+                    for task in existingFailedTasks {
+                        if let id = task.id {
+                            updatedTasksDict[id] = task
+                        }
                     }
                 }
                 
-                let updatedTasks = Array(updatedTasksDict.values)
-                
-                if !updatedTasks.isEmpty {
+                if !newlyFailedTasks.isEmpty {
                     if container.viewContext.hasChanges {
                         try container.viewContext.save()
-                        print("Saved changes to Core Data")
+                        os_log("Saved changes to Core Data", log: .data, type: .debug)
                     }
-                    
-                    print("Posting notification for \(updatedTasks.count) total failed tasks")
-                    DispatchQueue.main.async {
-                        NotificationCenter.default.post(
-                            name: .taskFailedNotification,
-                            object: nil,
-                            userInfo: ["failedTasks": updatedTasks]
-                        )
+                    let updatedTasks = Array(updatedTasksDict.values)
+                    if !updatedTasks.isEmpty {
+                        os_log("Posting notification for %d total failed tasks", log: .data, type: .debug, updatedTasks.count)
+                        DispatchQueue.main.async {
+                            NotificationCenter.default.post(
+                                name: .taskFailedNotification,
+                                object: nil,
+                                userInfo: ["failedTasks": updatedTasks]
+                            )
+                        }
                     }
-                } else {
-                    print("No failed tasks to process")
                 }
                 
             } catch {
-                print("Error while checking for failed deadlines: \(error)")
+                os_log("Error checking for failed deadlines: %{public}@", log: .data, type: .error, error.localizedDescription)
                 container.viewContext.rollback()
             }
         }
