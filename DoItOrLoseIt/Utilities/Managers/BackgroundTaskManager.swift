@@ -6,6 +6,7 @@
 //
 
 import BackgroundTasks
+import OSLog
 
 class BackgroundTaskManager: ObservableObject {
     private let dataManager: DataManager
@@ -41,35 +42,28 @@ class BackgroundTaskManager: ObservableObject {
     }
     
     private func handleProcessingTask(_ task: BGProcessingTask) {
-        let taskGroup = DispatchGroup()
-        taskGroup.enter()
-        
+
         task.expirationHandler = {
-            print("Processing task expired")
+            os_log("Processing task expired", log: .background, type: .info)
             task.setTaskCompleted(success: false)
         }
         
         DispatchQueue.global(qos: .utility).async {
-            print("Starting processing task execution")
+            os_log("Executing background processing task", log: .background, type: .debug)
             self.dataManager.checkForFailedDeadlines()
             self.dataManager.scheduleBackgroundTask()
-            taskGroup.leave()
-        }
-        
-        taskGroup.notify(queue: .main) {
-            print("Processing task completed")
             task.setTaskCompleted(success: true)
         }
     }
     
     private func handleRefreshTask(_ task: BGAppRefreshTask) {
         task.expirationHandler = {
-            print("Refresh task expired")
+            os_log("Refresh task expired", log: .background, type: .info)
             task.setTaskCompleted(success: false)
         }
         
         DispatchQueue.global(qos: .utility).async {
-            print("Starting refresh task execution")
+            os_log("Executing background refresh task", log: .background, type: .debug)
             self.dataManager.checkForFailedDeadlines()
             self.scheduleAppRefresh()
             task.setTaskCompleted(success: true)
@@ -78,13 +72,13 @@ class BackgroundTaskManager: ObservableObject {
     
     private func scheduleAppRefresh() {
         let request = BGAppRefreshTaskRequest(identifier: refreshTaskId)
-        request.earliestBeginDate = Date(timeIntervalSinceNow: 5 * 60)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: 15 * 60)
         
         do {
             try BGTaskScheduler.shared.submit(request)
-            print("Successfully scheduled app refresh task")
+            os_log("Successfully scheduled app refresh task", log: .background, type: .debug)
         } catch {
-            print("Could not schedule app refresh: \(error)")
+            os_log("Failed to schedule app refresh: %{public}@", log: .background, type: .error, error.localizedDescription)
         }
     }
 }
