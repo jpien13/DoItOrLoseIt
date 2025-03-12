@@ -14,10 +14,7 @@
 	<array>
 		<string>Jason.DoItOrLoseIt.deadlinecheck</string>
 		<string></string>
-		<string>fetch</string>
-		<string>processing</string>
 		<string>location</string>
-		<string>remote-notification</string>
 	</array>
 </dict>
 </plist>

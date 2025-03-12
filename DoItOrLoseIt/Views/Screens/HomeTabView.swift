@@ -39,9 +39,8 @@ struct HomeTabView: View {
             
         }
         .onAppear {
-            // Initialize deadline checking
-            dataManager.scheduleDeadlineCheck()
-            
+            dataManager.checkForFailedDeadlines()
+            dataManager.setupAppStateObservers()
             print("Setting up notification observer in HomeTabView")
             NotificationCenter.default.addObserver(
                 forName: .taskFailedNotification,

@@ -172,6 +172,22 @@ extension DataManager {
         }
     }
     
+    func setupAppStateObservers() {
+        // Check for failed deadlines when app becomes active
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(checkFailedDeadlinesOnActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+    }
+    
+    @objc private func checkFailedDeadlinesOnActive() {
+        os_log("App became active - checking deadlines", log: .app, type: .debug)
+        checkForFailedDeadlines()
+    }
+    
+    
     func checkForFailedDeadlines() {
         
         os_log("Checking for failed deadlines", log: .data, type: .debug)
@@ -194,25 +210,6 @@ extension DataManager {
                     task.taskStatus = .failed
                     if let id = task.id {
                         updatedTasksDict[id] = task
-                        
-                        let content = UNMutableNotificationContent()
-                        content.title = "Task Failed"
-                        content.body = "Your task \"\(task.title ?? "untitled\"")\" has passed its deadline."
-                        content.sound = .default
-                        content.threadIdentifier = "failed-tasks"
-                        content.interruptionLevel = .timeSensitive
-                        
-                        let request = UNNotificationRequest(
-                            identifier: id.uuidString,
-                            content: content,
-                            trigger: nil
-                        )
-                        
-                        UNUserNotificationCenter.current().add(request) { error in
-                            if let error = error {
-                                os_log("Error adding notification: %{public}@", log: .data, type: .error, error.localizedDescription)
-                            }
-                        }
                     }
                 }
                 
@@ -255,71 +252,6 @@ extension DataManager {
             }
         }
     }
-    
-    public func scheduleBackgroundTask() {
-        let request = BGProcessingTaskRequest(identifier: "Jason.DoItOrLoseIt.deadlinecheck")
-        request.requiresNetworkConnectivity = false
-        request.requiresExternalPower = false
-        
-        request.earliestBeginDate = Date(timeIntervalSinceNow: 16 * 60)
-        
-        do {
-            try BGTaskScheduler.shared.submit(request)
-            print("Successfully scheduled next background task")
-        } catch {
-            print("Could not schedule background task: \(error)")
-        }
-    }
-    
-    /*
-     Invalidate existing timer if any
-     Create new timer that fires every 5 seconds
-     */
-    private func startForegroundTimer() {
-        foregroundTimer?.invalidate()
-        foregroundTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { [weak self] _ in
-            print("Foreground timer fired - checking deadlines")
-            self?.checkForFailedDeadlines()
-        }
-    }
-    
-    /*
-     Stop the frequent foreground timer
-     Schedule background task (already set to 5 minutes)
-     */
-    @objc private func appMovedToBackground() {
-        print("App moved to background")
-        foregroundTimer?.invalidate()
-        foregroundTimer = nil
-        scheduleBackgroundTask()
-    }
-    
-    // Restart the frequent foreground timer
-    @objc private func appMovedToForeground() {
-        print("App moved to foreground")
-        startForegroundTimer()
-    }
-    
-    func scheduleDeadlineCheck() {
-        print("Scheduling deadline check")
-        checkForFailedDeadlines()
-        scheduleBackgroundTask()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appMovedToBackground),
-            name: UIApplication.didEnterBackgroundNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(appMovedToForeground),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
-        startForegroundTimer()
-    }
-    
 }
 
 extension Notification.Name {

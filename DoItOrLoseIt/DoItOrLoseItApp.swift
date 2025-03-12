@@ -13,26 +13,12 @@ import BackgroundTasks
 struct DoItOrLoseItApp: App {
     @StateObject private var dataManager: DataManager = DataManager()
     @StateObject private var locationManager: LocationManager
-    private let backgroundTaskManager: BackgroundTaskManager
     
     init() {
-        print("📱 App initializing")
         let dataManager = DataManager()
         let locationManager = LocationManager(dataManager: dataManager)
         _dataManager = StateObject(wrappedValue: dataManager)
         _locationManager = StateObject(wrappedValue: locationManager)
-        backgroundTaskManager = BackgroundTaskManager(dataManager: dataManager)
-
-        print("🔔 Setting up notifications")
-        UNUserNotificationCenter.current().requestAuthorization(
-            options: [.alert, .sound, .badge]
-        ) { granted, error in
-            if granted {
-                print("✅ Notifications Permission Granted")
-            } else if let error = error {
-                print("❌ Notifications Permission Denied: \(error)")
-            }
-        }
     }
     
     var body: some Scene {
@@ -45,7 +31,6 @@ struct DoItOrLoseItApp: App {
     }
 }
 
-// TODO: Push notifications using a server using firebase
 // TODO: Add wager subtract and balance
 // TODO: Watch ad to recover lost wager. Lost wagers go to charity. Ad revenue goes to me.
 // TODO: Maybe make it like flora or finch with virtual world
