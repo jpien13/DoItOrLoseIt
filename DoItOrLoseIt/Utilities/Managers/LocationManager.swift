@@ -8,7 +8,7 @@
 import SwiftUI
 import MapKit
 import CoreLocation
-
+import OSLog
 /**
  * LocationManager is responsible for handling all location-related functionality in the application.
  * It manages user location updates, authorization status, and provides geographic calculations.
@@ -140,29 +140,29 @@ final class LocationManager: NSObject, ObservableObject {
     */
     private func checkLocationAuth() {
         guard let deviceLocationManager = deviceLocationManager else {
-            print("❌ Device location manager is nil")
+            os_log("Device location manager is nil", log: .location, type: .error)
             return
         }
         
-        print("📱 Checking location auth status: \(deviceLocationManager.authorizationStatus.rawValue)")
+        os_log("Checking location authorization status: %d", log: .location, type: .debug, deviceLocationManager.authorizationStatus.rawValue)
         
         switch deviceLocationManager.authorizationStatus {
         case .notDetermined:
-            print("📍 Requesting authorization")
+            os_log("Requesting location authorization", log: .location, type: .info)
             deviceLocationManager.requestAlwaysAuthorization()
         case .restricted:
-            print("❌ Location restricted")
+            os_log("Location access restricted", log: .location, type: .info)
             alertItem = AlertContext.locationRestricted
         case .denied:
-            print("❌ Location denied")
+            os_log("Location access denied", log: .location, type: .info)
             alertItem = AlertContext.locationDenied
         case .authorizedAlways, .authorizedWhenInUse:
-            print("✅ Location authorized")
+            os_log("Location access authorized", log: .location, type: .info)
             deviceLocationManager.startUpdatingLocation()
             deviceLocationManager.allowsBackgroundLocationUpdates = true
             deviceLocationManager.pausesLocationUpdatesAutomatically = false
         @unknown default:
-            print("❓ Unknown authorization status")
+            os_log("Unknown authorization status", log: .location, type: .info)
             break
         }
     }
