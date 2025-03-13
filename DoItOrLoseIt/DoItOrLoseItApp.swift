@@ -11,7 +11,7 @@ import BackgroundTasks
 
 @main
 struct DoItOrLoseItApp: App {
-    @StateObject private var dataManager = DataManager()
+    @StateObject private var dataManager = DataManager.shared
     @StateObject private var locationManager: LocationManager
     
     init() {

@@ -30,7 +30,13 @@ class DataManager: NSObject, ObservableObject {
     // Default init method. Load the Core Data container
     override init() {
         super.init()
-        container.loadPersistentStores { _, _ in }
+            
+        container.loadPersistentStores { (description, error) in
+            if let error = error {
+                print("Error loading Core Data: \(error.localizedDescription)")
+            }
+        }
+        
         migrateExistingTasks()
         
         foregroundTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { [weak self] _ in
