@@ -231,6 +231,12 @@ extension DataManager {
                 let newlyFailedTasks = try backgroundContext.fetch(activeTasksFetch)
                 os_log("Found %d newly failed tasks", log: .data, type: .debug, newlyFailedTasks.count)
                 
+                let failedTasksFetch: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+                failedTasksFetch.predicate = NSPredicate(format: "status == %@", TaskStatus.failed.rawValue)
+                            
+                let alreadyFailedTasks = try backgroundContext.fetch(failedTasksFetch)
+                os_log("Found %d already failed tasks", log: .data, type: .debug, alreadyFailedTasks.count)
+                
                 if !newlyFailedTasks.isEmpty {
                     for task in newlyFailedTasks {
                         task.taskStatus = .failed
@@ -238,12 +244,14 @@ extension DataManager {
                     }
                     
                     try backgroundContext.save()
+                }
                     
-                    let failedTaskObjectIDs = newlyFailedTasks.map { $0.objectID }
-                    
+                let allFailedTaskObjectIDs = (newlyFailedTasks + alreadyFailedTasks).map { $0.objectID }
+                
+                if !allFailedTaskObjectIDs.isEmpty {
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
-                        let mainContextTasks = failedTaskObjectIDs.compactMap {
+                        let mainContextTasks = allFailedTaskObjectIDs.compactMap {
                             self.container.viewContext.object(with: $0) as? PinTask
                         }
                         
