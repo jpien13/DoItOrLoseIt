@@ -11,13 +11,11 @@ import BackgroundTasks
 
 @main
 struct DoItOrLoseItApp: App {
-    @StateObject private var dataManager: DataManager = DataManager()
+    @StateObject private var dataManager = DataManager()
     @StateObject private var locationManager: LocationManager
     
     init() {
-        let dataManager = DataManager()
-        let locationManager = LocationManager(dataManager: dataManager)
-        _dataManager = StateObject(wrappedValue: dataManager)
+        let locationManager = LocationManager(dataManager: DataManager.shared)
         _locationManager = StateObject(wrappedValue: locationManager)
     }
     

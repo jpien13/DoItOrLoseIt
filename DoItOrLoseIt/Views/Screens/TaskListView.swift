@@ -39,6 +39,7 @@ struct TaskListView: View {
                 .navigationTitle("Your Tasks")
             }
         }
+        
     }
     
 }

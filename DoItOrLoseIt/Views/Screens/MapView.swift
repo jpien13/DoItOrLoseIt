@@ -99,6 +99,9 @@ struct MapView: View {
             
             
         }
+        .onAppear {
+            dataManager.checkForFailedDeadlines()
+        }
         .sheet(isPresented: $sheetManager.showSheet, content:{
             if let coordinate = selectedCoordinate {
                 PinTaskInputForm(

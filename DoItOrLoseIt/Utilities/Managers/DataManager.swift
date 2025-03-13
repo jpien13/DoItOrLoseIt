@@ -16,6 +16,8 @@ import OSLog
 // Main data manager to handle the PinTask items
 class DataManager: NSObject, ObservableObject {
     
+    static let shared = DataManager()
+    
     /// Dynamic properties that the UI will react to
     @Published var todos: [PinTask] = [PinTask]()
     @Published var alertItem: AlertItem?
@@ -30,6 +32,11 @@ class DataManager: NSObject, ObservableObject {
         super.init()
         container.loadPersistentStores { _, _ in }
         migrateExistingTasks()
+        
+        foregroundTimer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { [weak self] _ in
+            self?.checkForFailedDeadlines()
+        }
+        checkForFailedDeadlines()
     }
     
     func filterPinTasksInBoundingBox(
@@ -189,66 +196,64 @@ extension DataManager {
     
     
     func checkForFailedDeadlines() {
-        
-        os_log("Checking for failed deadlines", log: .data, type: .debug)
         let now = Date()
-        container.viewContext.performAndWait {
+        os_log("Checking for failed deadlines at %{public}@", log: .data, type: .debug, now.description)
+        
+        let backgroundContext = container.newBackgroundContext()
+        backgroundContext.perform {
             do {
                 // First check for all active tasks that passed their deadline
                 let activeTasksFetch: NSFetchRequest<PinTask> = PinTask.fetchRequest()
+                
+                // Explicitly log all active tasks to see what we're working with
+                let allActiveTasks = try backgroundContext.fetch(PinTask.fetchRequest())
+                os_log("Total tasks in database: %d", log: .data, type: .debug, allActiveTasks.count)
+                
+                for task in allActiveTasks {
+                    os_log("Task: %{public}@, Status: %{public}@, Deadline: %{public}@",
+                           log: .data, type: .debug,
+                           task.title ?? "untitled",
+                           task.status,
+                           task.deadline?.description ?? "no deadline")
+                }
+                
                 activeTasksFetch.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
                     NSPredicate(format: "status == %@", TaskStatus.active.rawValue),
-                    NSPredicate(format: "deadline != nil AND deadline < %@", now as NSDate)
+                    NSPredicate(format: "deadline < %@", now as NSDate)
                 ])
                 
-                let newlyFailedTasks = try container.viewContext.fetch(activeTasksFetch)
+                let newlyFailedTasks = try backgroundContext.fetch(activeTasksFetch)
                 os_log("Found %d newly failed tasks", log: .data, type: .debug, newlyFailedTasks.count)
                 
-                var updatedTasksDict = [UUID: PinTask]()
-                
-                for task in newlyFailedTasks {
-                    task.taskStatus = .failed
-                    if let id = task.id {
-                        updatedTasksDict[id] = task
-                    }
-                }
-                
-                // Get already failed tasks
                 if !newlyFailedTasks.isEmpty {
-                    let failedTasksFetch: NSFetchRequest<PinTask> = PinTask.fetchRequest()
-                    failedTasksFetch.predicate = NSPredicate(format: "status == %@", TaskStatus.failed.rawValue)
+                    for task in newlyFailedTasks {
+                        task.taskStatus = .failed
+                        os_log("Marking task '%{public}@' as failed", log: .data, type: .debug, task.title ?? "untitled")
+                    }
                     
-                    let existingFailedTasks = try container.viewContext.fetch(failedTasksFetch)
-                    os_log("Found %d existing failed tasks", log: .data, type: .debug, existingFailedTasks.count)
+                    try backgroundContext.save()
                     
-                    for task in existingFailedTasks {
-                        if let id = task.id {
-                            updatedTasksDict[id] = task
+                    let failedTaskObjectIDs = newlyFailedTasks.map { $0.objectID }
+                    
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
+                        let mainContextTasks = failedTaskObjectIDs.compactMap {
+                            self.container.viewContext.object(with: $0) as? PinTask
                         }
-                    }
-                }
-                
-                if !newlyFailedTasks.isEmpty {
-                    if container.viewContext.hasChanges {
-                        try container.viewContext.save()
-                        os_log("Saved changes to Core Data", log: .data, type: .debug)
-                    }
-                    let updatedTasks = Array(updatedTasksDict.values)
-                    if !updatedTasks.isEmpty {
-                        os_log("Posting notification for %d total failed tasks", log: .data, type: .debug, updatedTasks.count)
-                        DispatchQueue.main.async {
+                        
+                        if !mainContextTasks.isEmpty {
+                            os_log("Posting notification for %d failed tasks", log: .data, type: .debug, mainContextTasks.count)
                             NotificationCenter.default.post(
                                 name: .taskFailedNotification,
                                 object: nil,
-                                userInfo: ["failedTasks": updatedTasks]
+                                userInfo: ["failedTasks": mainContextTasks]
                             )
                         }
                     }
                 }
-                
             } catch {
                 os_log("Error checking for failed deadlines: %{public}@", log: .data, type: .error, error.localizedDescription)
-                container.viewContext.rollback()
+                backgroundContext.rollback()
             }
         }
     }
