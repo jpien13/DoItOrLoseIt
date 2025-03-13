@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import OSLog
 
 struct HomeTabView: View {
 
@@ -41,15 +42,13 @@ struct HomeTabView: View {
         .onAppear {
             dataManager.checkForFailedDeadlines()
             dataManager.setupAppStateObservers()
-            print("Setting up notification observer in HomeTabView")
             NotificationCenter.default.addObserver(
                 forName: .taskFailedNotification,
                 object: nil,
                 queue: .main
             ) { notification in
-                print("Received task failed notification in HomeTabView")
                 if let tasks = notification.userInfo?["failedTasks"] as? [PinTask] {
-                    print("Found \(tasks.count) failed tasks")
+                    os_log("Found %d failed tasks", log: . app, type: .info, tasks.count)
                     failedTasks = tasks
                     showingFailedTaskAlert = !tasks.isEmpty
                 }

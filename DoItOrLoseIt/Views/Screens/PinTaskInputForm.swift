@@ -8,6 +8,7 @@
 import SwiftUI
 import MapKit
 import CoreData
+import OSLog
 
 struct PinTaskInputForm: View {
     
@@ -88,28 +89,35 @@ struct PinTaskInputForm: View {
         pinTask.title = self.title
         pinTask.status = TaskStatus.active.rawValue
         
-        print("📍 Saving new PinTask coordinates:")
-        print("- Latitude: \(self.coordinate.latitude)")
-        print("- Longitude: \(self.coordinate.longitude)")
-        print("Saving new PinTask:")
-        print("Title: \(self.title)")
-        print("Deadline: \(self.deadline)")
-        print("Status: \(TaskStatus.active.rawValue)")
+        os_log("📍 Saving new PinTask coordinates:", log: .app, type: .info)
+        os_log("- Latitude: %f", log: .app, type: .info, self.coordinate.latitude)
+        os_log("- Longitude: %f", log: .app, type: .info, self.coordinate.longitude)
+        os_log("Saving new PinTask:", log: .app, type: .info)
+        os_log("Title: %{public}@", log: .app, type: .info, self.title)
+        os_log("Deadline: %{public}@", log: .app, type: .info, String(describing: self.deadline))
+        os_log("Status: %{public}@", log: .app, type: .info, TaskStatus.active.rawValue)
         
         do {
             try self.viewContext.save()
-            print("PinTask Saved Successfully")
-            
-            // Verify the save by fetching
+            os_log("PinTask Saved Successfully", log: .data, type: .info)
             let fetchRequest: NSFetchRequest<PinTask> = PinTask.fetchRequest()
             let tasks = try self.viewContext.fetch(fetchRequest)
-            print("Total tasks in Core Data: \(tasks.count)")
-            print("All tasks:")
+            os_log("Total tasks in Core Data: %d", log: .data, type: .info, tasks.count)
+            os_log("All tasks:", log: .data, type: .info)
             for task in tasks {
-                print("- Title: \(task.title ?? "untitled"), Deadline: \(task.deadline?.description ?? "no deadline"), Status: \(task.status)")
+                let titleString = task.title ?? "untitled"
+                let deadlineString = task.deadline?.description ?? "no deadline"
+                let statusString = String(describing: task.status)
+
+                os_log("- Title: %{public}@, Deadline: %{public}@, Status: %{public}@",
+                       log: .app,
+                       type: .info,
+                       titleString,
+                       deadlineString,
+                       statusString)
             }
         } catch {
-            print("Error saving PinTask: \(error.localizedDescription)")
+            os_log("Error saving PinTask: %{public}@", log: .data, type: .error, error.localizedDescription)
         }
             
     }

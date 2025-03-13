@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import OSLog
 
 struct FailTaskView: View {
     
@@ -59,7 +60,7 @@ struct FailTaskView: View {
                 isPresented = false
             }
         } catch {
-            print("Error honorring price: \(error.localizedDescription)")
+            os_log("ERROR honorring price: %{public}@", log: .app, type: .error, error.localizedDescription)
         }
     }
     

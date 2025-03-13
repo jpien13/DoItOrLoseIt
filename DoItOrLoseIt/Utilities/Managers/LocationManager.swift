@@ -36,7 +36,7 @@ final class LocationManager: NSObject, ObservableObject {
     init(dataManager: DataManager) {
         self.dataManager = dataManager
         super.init()
-        print("🚀 LocationManager initialized")
+        os_log("LocationManager initialized", log: .app, type: .info)
         checkIfLocationServicesIsEnable()
     }
 
@@ -110,7 +110,7 @@ final class LocationManager: NSObject, ObservableObject {
      */
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.last else { return }
-        print("📍 Location update received: \(location.coordinate)")
+        os_log("Location UPDATE received: %{public}@", log: .location, type: .info, "\(location.coordinate)")
         userLocation = CoordinateWrapper(coordinate: location.coordinate)
         isLocationReady = true
     }

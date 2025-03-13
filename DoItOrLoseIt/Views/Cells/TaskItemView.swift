@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreLocation
+import OSLog
 
 struct TaskItemView: View {
     @Environment(\.managedObjectContext) var viewContext
@@ -67,7 +68,7 @@ struct TaskItemView: View {
             DispatchQueue.main.async {
                 if let error = error {
                     self.address = "Address unavailable"
-                    print("Geocoding error: \(error.localizedDescription)")
+                    os_log("Geocoding failed - %{public}@", log: .location, type: .error, error.localizedDescription)
                     return
                 }
                 

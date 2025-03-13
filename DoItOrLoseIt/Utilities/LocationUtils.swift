@@ -23,10 +23,6 @@ struct LocationUtils {
         let c = 2 * atan2(sqrt(a), sqrt(1 - a))
         
         let distance = earthRadius * c * 1000
-        print("📏 Haversine calculation details:")
-        print("- Point 1: \(from)")
-        print("- Point 2: \(to)")
-        print("- Raw distance (m): \(distance)")
         return distance
     }
 }

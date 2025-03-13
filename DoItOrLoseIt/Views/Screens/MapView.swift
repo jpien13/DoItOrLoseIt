@@ -7,6 +7,7 @@
 
 import SwiftUI
 import MapKit
+import OSLog
 
 // =============================================================
 // A VIEW that renders the UI displaying data from the VIEWMODEL
@@ -117,10 +118,15 @@ struct MapView: View {
             }
         }
         .onChange(of: locationManager.userLocation) { oldValue, newValue in
-            print("🌍 User location changed")
+            os_log("User location CHANGED", log: .location, type: .info)
             if let locationWrapper = newValue,
                let boundingBox = locationManager.calculateBoundingBox() {
-                print("📦 Bounding box calculated: SW(\(boundingBox.southWest)), NE(\(boundingBox.northEast))")
+                os_log("📦 Bounding box calculated: SW(%{public}@), NE(%{public}@)",
+                       log: .app,
+                       type: .info,
+                       String(describing: boundingBox.southWest),
+                       String(describing: boundingBox.northEast))
+                
                 dataManager.removePinTasksWithin50Meters(
                     userLocation: locationWrapper.coordinate,
                     boundingbox: boundingBox,
