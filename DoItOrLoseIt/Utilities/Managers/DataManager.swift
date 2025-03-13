@@ -33,7 +33,7 @@ class DataManager: NSObject, ObservableObject {
             
         container.loadPersistentStores { (description, error) in
             if let error = error {
-                print("Error loading Core Data: \(error.localizedDescription)")
+                os_log("Error loading Core Data: %{public}@", log: .data, type: .error, error.localizedDescription)
             }
         }
         
@@ -71,7 +71,7 @@ class DataManager: NSObject, ObservableObject {
         do {
             return try context.fetch(fetchRequest)
         } catch {
-            print("Error fetching filtered pin tasks: \(error)")
+            os_log("Error fetching filtered pin tasks.", log: .data, type: .error)
             return []
         }
     }
@@ -81,10 +81,9 @@ class DataManager: NSObject, ObservableObject {
         boundingbox: (southWest: CLLocationCoordinate2D, northEast: CLLocationCoordinate2D),
         context: NSManagedObjectContext
     ) {
-        print("Checking tasks within 50m of user location: \(userLocation)")
+        os_log("Checking tasks within 50m of user location (bounding box)", log: .location, type: .info)
         let filteredTasks = filterPinTasksInBoundingBox(boundingBox: boundingbox, context: context)
-        print("Found \(filteredTasks.count) tasks in bounding box")
-        
+        os_log("Found %d tasks in bounding box", log: .data, type: .info, filteredTasks.count)
         for pinTask in filteredTasks {
             let taskLocation = CLLocationCoordinate2D(
                 latitude: pinTask.latitude,
@@ -95,14 +94,13 @@ class DataManager: NSObject, ObservableObject {
                 from: userLocation,
                 to: taskLocation
             )
-            
-            print("Task '\(pinTask.title ?? "untitled")' details:")
-            print("- Task location: \(taskLocation)")
-            print("- Distance from user: \(distance) meters")
-            print("- Within range? \(distance <= 50 ? "Yes" : "No")")
+            os_log("Task %{public}@ details:", log: .app, type: .info, pinTask.title ?? "untitled")
+            os_log("- Task location: %{publis}@", log: .app, type: .info, "\(taskLocation)")
+            os_log("- Distance from user: %0.2f meters", log: .app, type: .info, distance)
+            os_log("- Within range? %{public}@", log: .app, type: .info, distance <= 50 ? "Yes" : "No")
             
             if distance <= 50 {
-                print("🗑️ Removing task within range: \(pinTask.title ?? "untitled")")
+                os_log("Removing task within range: %{public}@", log: .app, type: .info, pinTask.title ?? "untitled")
                 context.delete(pinTask)
             }
         }
@@ -111,12 +109,12 @@ class DataManager: NSObject, ObservableObject {
         do {
             if context.hasChanges {
                 try context.save()
-                print("✅ Changes saved - tasks removed")
+                os_log("Changes SAVED - tasks removed", log: .data, type: .info)
             } else {
-                print("ℹ️ No changes to save")
+                os_log("NO changes to save", log: .data, type: .info)
             }
         } catch {
-            print("❌ Error saving context: \(error)")
+            os_log("ERROR saving context", log: .data, type: .error)
             alertItem = AlertItem(
                 title: Text("Error"),
                 message: Text("Unable to delete completed tasks."),
@@ -126,7 +124,7 @@ class DataManager: NSObject, ObservableObject {
     }
     
     func migrateExistingTasks() {
-        print("Starting migration of existing tasks")
+        os_log("Starting migration of existing tasks", log: .app, type: .info)
         let fetchRequest: NSFetchRequest<PinTask> = PinTask.fetchRequest()
         
         fetchRequest.predicate = NSPredicate(format: "status == nil OR status == ''")
@@ -134,19 +132,19 @@ class DataManager: NSObject, ObservableObject {
         container.viewContext.performAndWait {
             do {
                 let tasksToMigrate = try container.viewContext.fetch(fetchRequest)
-                print("Found \(tasksToMigrate.count) tasks to migrate")
+                os_log("Found %d tasks to migrate", log: .data, type: .info, tasksToMigrate.count)
                 
                 for task in tasksToMigrate {
                     task.status = TaskStatus.active.rawValue
-                    print("Migrated task: \(task.title ?? "untitled")")
+                    os_log("Migrated task: %{public}@", log: .data, type: .info, task.title ?? "untitled")
                 }
                 
                 if container.viewContext.hasChanges {
                     try container.viewContext.save()
-                    print("Migration completed successfully")
+                    os_log("Migration completed successfully", log: .data, type: .info)
                 }
             } catch {
-                print("Migration error: \(error)")
+                os_log("Migration error", log: .app, type: .error)
                 container.viewContext.rollback()
             }
         }
