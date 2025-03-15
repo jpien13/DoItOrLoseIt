@@ -14,6 +14,12 @@ class BalanceManager: ObservableObject {
     
     @Published var alertItem: AlertItem?
     
+    private var container: NSPersistentContainer
+    
+    init(container: NSPersistentContainer = DataManager.shared.container){
+        self.container = container
+    }
+    
     /*
      Add funds to balance.
      
@@ -63,8 +69,26 @@ class BalanceManager: ObservableObject {
         
     }
     
+    /*
+     Updates the balance. Duh.
+     
+     
+     Param:
+     amount: The amount to update balance by
+     type: type of transaction (+ or -)
+     transactionDescription: Descriptions of transaction
+     taskId: optional UUID to link transaction to specific task. defaulted to nil
+     
+     ---------------------------------------------------------------------
+     Creates a new background context from persistent container and runs
+     code on that context. Prevents retaining the cycle via a weak reference to self
+     */
     private func updateBalance(_ amount: Double, type: TransactionType, transactionDescription: String, taskId: UUID? = nil){
-        
+        let context = container.newBackgroundContext()
+        context.perform {[weak self] in
+            guard let self = self else{return}
+            // TODO: update UserBalance
+        }
     }
     
     
