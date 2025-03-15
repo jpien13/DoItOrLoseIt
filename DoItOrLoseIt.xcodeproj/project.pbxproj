@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A778C7FB2D8626BB0074A2A1 /* Transaction+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A778C7F92D8626BB0074A2A1 /* Transaction+CoreDataClass.swift */; };
+		A778C7FC2D8626BB0074A2A1 /* Transaction+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = A778C7FA2D8626BB0074A2A1 /* Transaction+CoreDataProperties.swift */; };
+		A778C8032D8628920074A2A1 /* UserBalance+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = A778C8022D8628920074A2A1 /* UserBalance+CoreDataProperties.swift */; };
+		A778C8042D8628920074A2A1 /* UserBalance+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A778C8012D8628920074A2A1 /* UserBalance+CoreDataClass.swift */; };
 		A7CB2C1B2D5BEE270000DC80 /* PinTaskList.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A7CB2C192D5BEE270000DC80 /* PinTaskList.xcdatamodeld */; };
 		A7CB2C1E2D5BEF220000DC80 /* PinTask+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7CB2C1C2D5BEF220000DC80 /* PinTask+CoreDataClass.swift */; };
 		A7CB2C1F2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7CB2C1D2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift */; };
@@ -30,6 +34,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A778C7F92D8626BB0074A2A1 /* Transaction+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Transaction+CoreDataClass.swift"; sourceTree = "<group>"; };
+		A778C7FA2D8626BB0074A2A1 /* Transaction+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Transaction+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		A778C8012D8628920074A2A1 /* UserBalance+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserBalance+CoreDataClass.swift"; sourceTree = "<group>"; };
+		A778C8022D8628920074A2A1 /* UserBalance+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserBalance+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		A79B33312D42C9DF00E376E2 /* DoItOrLoseIt.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoItOrLoseIt.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A79B33432D42C9E100E376E2 /* DoItOrLoseItTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoItOrLoseItTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A79B334D2D42C9E100E376E2 /* DoItOrLoseItUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DoItOrLoseItUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -97,6 +105,10 @@
 		A79B33282D42C9DF00E376E2 = {
 			isa = PBXGroup;
 			children = (
+				A778C8012D8628920074A2A1 /* UserBalance+CoreDataClass.swift */,
+				A778C8022D8628920074A2A1 /* UserBalance+CoreDataProperties.swift */,
+				A778C7F92D8626BB0074A2A1 /* Transaction+CoreDataClass.swift */,
+				A778C7FA2D8626BB0074A2A1 /* Transaction+CoreDataProperties.swift */,
 				A7CB2C1C2D5BEF220000DC80 /* PinTask+CoreDataClass.swift */,
 				A7CB2C1D2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift */,
 				A7CB2C192D5BEE270000DC80 /* PinTaskList.xcdatamodeld */,
@@ -264,6 +276,10 @@
 				A7CB2C1E2D5BEF220000DC80 /* PinTask+CoreDataClass.swift in Sources */,
 				A7CB2C1F2D5BEF220000DC80 /* PinTask+CoreDataProperties.swift in Sources */,
 				A7CB2C1B2D5BEE270000DC80 /* PinTaskList.xcdatamodeld in Sources */,
+				A778C8032D8628920074A2A1 /* UserBalance+CoreDataProperties.swift in Sources */,
+				A778C8042D8628920074A2A1 /* UserBalance+CoreDataClass.swift in Sources */,
+				A778C7FB2D8626BB0074A2A1 /* Transaction+CoreDataClass.swift in Sources */,
+				A778C7FC2D8626BB0074A2A1 /* Transaction+CoreDataProperties.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
