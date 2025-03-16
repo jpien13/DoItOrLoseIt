@@ -13,6 +13,7 @@ import SwiftUI
 class BalanceManager: ObservableObject {
     
     @Published var alertItem: AlertItem?
+    @Published var currentBalance: Double = 0
     
     private var container: NSPersistentContainer
     
@@ -61,8 +62,26 @@ class BalanceManager: ObservableObject {
         
     }
     
-    private func createInitBalance(){
+    /*
+     Creates inital balance which starts off at $0
+     
+     Param:
+     context: The NSManagedObjectContext which is the core data context for
+              DB operations
+     */
+    private func createInitBalance(context: NSManagedObjectContext){
+        let userBalance = UserBalance(context: context)
+        userBalance.id = UUID()
+        userBalance.amount = 0
+        userBalance.lastUpdated = Date()
         
+        do {
+            try context.save()
+            self.currentBalance = 0.0
+            os_log("Saved inital balance", log: .data, type: .info)
+        } catch {
+            os_log("Failed to create inital balance", log: .data, type: .error)
+        }
     }
     
     private func loadTransactions(){
